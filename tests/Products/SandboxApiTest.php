@@ -1,16 +1,17 @@
 <?php
 
-namespace Tests;
+namespace Tests\Products;
 
-use Lepresk\MomoApi\Exception\BadRequestExeption;
-use Lepresk\MomoApi\Exception\ConflictException;
-use Lepresk\MomoApi\Exception\MomoException;
-use Lepresk\MomoApi\Exception\RessourceNotFoundException;
+use Lepresk\MomoApi\Exceptions\BadRequestExeption;
+use Lepresk\MomoApi\Exceptions\ConflictException;
+use Lepresk\MomoApi\Exceptions\MomoException;
+use Lepresk\MomoApi\Exceptions\RessourceNotFoundException;
 use Lepresk\MomoApi\MomoApi;
 use Lepresk\MomoApi\Utilities;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Tests\TestCase;
 
-class SandboxTest extends TestCase
+class SandboxApiTest extends TestCase
 {
     public function testSubscriptionKeyPassed()
     {
@@ -25,8 +26,8 @@ class SandboxTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create($subscriptionKey);
-        $momo->sandbox()->createApiKey('toto');
+        $momo = MomoApi::create();
+        $momo->sandbox($subscriptionKey)->createApiKey('toto');
     }
 
     public function testCreateApiUser()
@@ -47,8 +48,8 @@ class SandboxTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $result = $momo->sandbox()->createApiUser($uuid, $callbackHost);
+        $momo = MomoApi::create();
+        $result = $momo->sandbox('testSubKey')->createApiUser($uuid, $callbackHost);
 
         $this->assertEquals($uuid, $result);
     }
@@ -67,8 +68,8 @@ class SandboxTest extends TestCase
         $this->expectException(ConflictException::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->sandbox()->createApiUser($uuid, $callbackHost);
+        $momo = MomoApi::create();
+        $momo->sandbox('testSubKey')->createApiUser($uuid, $callbackHost);
     }
 
     public function testThrowBadRequestIfInvalidApiUser()
@@ -84,8 +85,8 @@ class SandboxTest extends TestCase
         $this->expectException(BadRequestExeption::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->sandbox()->createApiUser('badUUID', $callbackHost);
+        $momo = MomoApi::create();
+        $momo->sandbox('testSubKey')->createApiUser('badUUID', $callbackHost);
     }
 
     public function testGetApiUser()
@@ -106,8 +107,8 @@ class SandboxTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $result = $momo->sandbox()->getApiUser($uuid);
+        $momo = MomoApi::create();
+        $result = $momo->sandbox('testSubKey')->getApiUser($uuid);
 
         $this->assertEquals($user, $result);
     }
@@ -129,8 +130,8 @@ class SandboxTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->sandbox()->getApiUser($uuid);
+        $momo = MomoApi::create();
+        $momo->sandbox('testSubKey')->getApiUser($uuid);
     }
 
     public function testCreateApiKey()
@@ -146,8 +147,8 @@ class SandboxTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $result = $momo->sandbox()->createApiKey($apiUser);
+        $momo = MomoApi::create();
+        $result = $momo->sandbox('testSubKey')->createApiKey($apiUser);
 
         $this->assertSame($result, 'aKey');
     }
@@ -165,7 +166,7 @@ class SandboxTest extends TestCase
         $this->expectException(MomoException::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->sandbox()->createApiKey($apiUser);
+        $momo = MomoApi::create();
+        $momo->sandbox('testSubKey')->createApiKey($apiUser);
     }
 }

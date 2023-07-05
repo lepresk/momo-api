@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Lepresk\MomoApi\Collection;
+namespace Lepresk\MomoApi\Models;
 
 class Transaction
 {
@@ -43,6 +43,13 @@ class Transaction
         $this->reason = $reason;
     }
 
+    /**
+     * Parse a transaction from an array, can be used to create a Transaction object
+     * from an GET request
+     *
+     * @param array $array
+     * @return Transaction
+     */
     public static function parse(array $array): Transaction
     {
         return new self(

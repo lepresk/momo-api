@@ -1,16 +1,16 @@
 <?php
 
-namespace Tests\Collection;
+namespace Tests\Products;
 
-use Lepresk\MomoApi\Collection\Config;
-use Lepresk\MomoApi\Collection\PaymentRequest;
-use Lepresk\MomoApi\Exception\MomoException;
+use Lepresk\MomoApi\Config;
+use Lepresk\MomoApi\Exceptions\MomoException;
+use Lepresk\MomoApi\Models\PaymentRequest;
 use Lepresk\MomoApi\MomoApi;
 use Lepresk\MomoApi\Utilities;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Tests\TestCase;
 
-class MomoCollectionTest extends TestCase
+class CollectionApiTest extends TestCase
 {
     public function testSubscriptionKeyPassed()
     {
@@ -25,8 +25,8 @@ class MomoCollectionTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create($subscriptionKey);
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection($subscriptionKey, "apiUser", "apiKey", "aCalllback"));
         $momo->collection()->getAccessToken();
     }
 
@@ -48,8 +48,8 @@ class MomoCollectionTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $token = $momo->collection()->getAccessToken();
 
         $this->assertEquals($sampleToken['access_token'], $token->getAccessToken());
@@ -68,8 +68,8 @@ class MomoCollectionTest extends TestCase
 
         $this->expectException(MomoException::class);
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $momo->collection()->getAccessToken();
     }
 
@@ -86,8 +86,8 @@ class MomoCollectionTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
 
@@ -118,8 +118,8 @@ class MomoCollectionTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
 
@@ -146,7 +146,7 @@ class MomoCollectionTest extends TestCase
 
         $expectedRequests = [
             $this->provideTokenResponse(),
-            function ($method, $url) use($paymentId, $data): MockResponse {
+            function ($method, $url) use ($paymentId, $data): MockResponse {
                 $this->assertSame('GET', $method);
                 $this->assertSame(MomoApi::getBaseUrl() . "/collection/v1_0/requesttopay/$paymentId", $url);
                 return new MockResponse(json_encode($data), ['http_code' => 200]);
@@ -154,8 +154,8 @@ class MomoCollectionTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create('testSubKey');
-        $momo->setupCollection(new Config("apiUser", "apiKey", "aCalllback"));
+        $momo = MomoApi::create();
+        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $transaction = $momo->collection()->checkRequestStatus($paymentId);
 
         $this->assertEquals($data['status'], $transaction->getStatus());
