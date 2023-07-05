@@ -1,0 +1,42 @@
+{
+    "name": "lepresk/momo-api",
+    "description": "A powerful and user-friendly wrapper for integrating the MoMo (Mobile Money) API into PHP applications. Connect your PHP app to the MoMo platform, enabling users to perform financial transactions using their preferred Mobile Money services.",
+    "keywords": [
+        "momo",
+        "mobile money",
+        "api",
+        "php",
+        "financial transactions"
+    ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/http-client": "^6.3",
+        "ext-curl": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.2",
+        "symfony/var-dumper": "^6.3",
+        "ext-json": "*",
+        "mockery/mockery": "^1.6"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lepresk\\MomoApi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "lepres",
+            "email": "lepresk@gmail.com"
+        }
+    ],
+    "scripts": {
+        "test": "phpunit --colors=always --testdox"
+    }
+}
