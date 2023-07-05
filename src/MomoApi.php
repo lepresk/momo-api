@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Lepresk\MomoApi;
 
 use InvalidArgumentException;
-use Lepresk\MomoApi\Collection\Config;
-use Lepresk\MomoApi\Collection\MomoCollection;
+use Lepresk\MomoApi\Products\CollectionApi;
+use Lepresk\MomoApi\Products\DisbursementApi;
+use Lepresk\MomoApi\Products\SandboxApi;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -24,9 +25,12 @@ class MomoApi
     public const ENVIRONMENT_LIBERIA = 'mtnliberia';
     public const ENVIRONMENT_SANDBOX = 'sandbox';
 
+
     public const SANDBOX_URL = 'https://sandbox.momodeveloper.mtn.com';
     public const PRODUCTION_URL = 'https://proxy.momoapi.mtn.com';
+
     public static string $environment = self::ENVIRONMENT_SANDBOX;
+
     /**
      * Instance singleton
      *
@@ -34,18 +38,13 @@ class MomoApi
      */
     private static ?MomoApi $instance = null;
     private static ?HttpClientInterface $client = null;
-    private ?Config $collectionConfig = null;
-    /**
-     * @var string
-     */
-    private string $subscriptionKey;
 
-    /**
-     * @param string $subscriptionKey
-     */
-    private function __construct(string $subscriptionKey)
+    private ?Config $collectionConfig = null;
+
+    private ?Config $disbursementConfig = null;
+
+    private function __construct()
     {
-        $this->subscriptionKey = $subscriptionKey;
     }
 
     /**
@@ -68,10 +67,9 @@ class MomoApi
     /**
      * Class factory
      *
-     * @param string $subscriptionKey
      * @return MomoApi
      */
-    public static function create(string $subscriptionKey): MomoApi
+    public static function create(): MomoApi
     {
         if (!self::$instance) {
             if (static::$client === null) {
@@ -79,7 +77,7 @@ class MomoApi
                     'base_uri' => static::getBaseUrl(),
                 ]);
             }
-            self::$instance = new self($subscriptionKey);
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -100,38 +98,56 @@ class MomoApi
         self::$environment = $environment;
     }
 
-    /**
-     * @param Config $config
-     * @return void
-     */
     public function setupCollection(Config $config): void
     {
         $this->collectionConfig = $config;
     }
 
+    public function setupDisbursement(Config $config): void
+    {
+        $this->disbursementConfig = $config;
+    }
+
     /**
      * Momo API Collection factory
+     *
+     * @return CollectionApi
      */
-    public function collection(): MomoCollection
+    public function collection(): CollectionApi
     {
         if ($this->collectionConfig === null) {
             throw new InvalidArgumentException("Collection must be setup with `MomoApi::setupCollection` before call `MomoApi::collection`");
         }
 
-        return new MomoCollection(static::$client, $this->subscriptionKey, $this->collectionConfig,  self::$environment);
+        return new CollectionApi(static::$client, self::$environment, $this->collectionConfig);
+    }
+
+    /**
+     * Access to Disbursements product
+     *
+     * @return DisbursementApi
+     */
+    public function disbursement(): DisbursementApi
+    {
+        if ($this->disbursementConfig === null) {
+            throw new InvalidArgumentException("Disbursement must be setup with `MomoApi::setupDisbursement` before call `MomoApi::disbursement`");
+        }
+
+        return new DisbursementApi(static::$client, self::$environment, $this->disbursementConfig);
     }
 
     /**
      * Access to the sandbox environment
      *
-     * @return Sandbox
+     * @param string $subscriptionKey
+     * @return SandboxApi
      */
-    public function sandbox(): Sandbox
+    public function sandbox(string $subscriptionKey): SandboxApi
     {
         if (self::$environment !== self::ENVIRONMENT_SANDBOX) {
             throw new InvalidArgumentException("Environment must be " . self::ENVIRONMENT_SANDBOX);
         }
 
-        return new Sandbox(static::$client, $this->subscriptionKey);
+        return new SandboxApi(static::$client, self::$environment, Config::sandbox($subscriptionKey));
     }
 }

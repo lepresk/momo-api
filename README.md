@@ -42,13 +42,12 @@ require 'vendor/autoload.php';
 $subscriptionKey = 'SUBSCRIPTION KEY HERE';
 
 // Récupérer le client Momo
-$momo = MomoApi::create($subscriptionKey);
-
-// Assurez-vous de remplacer "SUBSCRIPTION KEY HERE" par votre clé d'abonnement réelle.
+$momo = MomoApi::create();
 
 // Définir l'environnement (MomoApi::ENVIRONMENT_SANDBOX par défaut)
 $momo->setEnvironment(MomoApi::ENVIRONMENT_SANDBOX);
 ```
+// Assurez-vous de remplacer "SUBSCRIPTION KEY HERE" par votre clé d'abonnement réelle.
 
 Les environnements possibles
 
@@ -78,14 +77,14 @@ $momo->setEnvironment(MomoApi::ENVIRONMENT_SANDBOX);
 $uuid = Utilities::guidv4(); // Ou tout autre guuidv4 valide
 $callbackHost = 'https://my-domain.com/callback';
 
-$apiUser = $momo->sandbox()->createApiUser($uuid, $callbackHost);
+$apiUser = $momo->sandbox($subscriptionKey)->createApiUser($uuid, $callbackHost);
 echo "Api user created: $apiUser\n";
 ```
 
 #### [Récupérer les informations d'un utilisateur](https://momodeveloper.mtn.com/docs/services/sandbox-provisioning-api/operations/get-v1_0-apiuser)
 
 ```php
-$data = $momo->sandbox()->getApiUser($apiUser);
+$data = $momo->sandbox($subscriptionKey)->getApiUser($apiUser);
 print_r($data);
 // [
 //      'providerCallbackHost' => 'https://my-domain.com/callback',
@@ -96,25 +95,33 @@ print_r($data);
 #### [Créer une api key](https://momodeveloper.mtn.com/docs/services/sandbox-provisioning-api/operations/post-v1_0-apiuser-apikey)
 
 ```php
-$apiKey = $momo->sandbox()->createApiKey($apiUser);
+$apiKey = $momo->sandbox($subscriptionKey)->createApiKey($apiUser);
 echo "Api token created: $apiKey\n";
 ```
 
 ### Intéragir avec le produit collection
 
 ```php
-$config = new \Lepresk\MomoApi\Collection\Config($apiUser, $apiKey, $callbackHost);
+$config = new \Lepresk\MomoApi\Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackHost);
 $momo->setupCollection($config);
 ```
 
-### Obtenir un token oauth
+#### Obtenir un token oauth
 
 ```php
 $token = $momo->collection()->getAccessToken();
 
 echo $token->getAccessToken(); // Token
 echo $token->getExpiresIn(); // Date d'expiration du token
+```
 
+#### Récupérer le solde du compte
+
+```php
+$balance = $momo->collection()->getAccountBalance();
+
+echo $balance->getAvailableBalance(); // Solde du compte
+echo $balance->getCurrency(); // Devise du compte
 ```
 
 #### Faire une requête requestToPay

@@ -1,45 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Lepresk\MomoApi\Collection;
+namespace Lepresk\MomoApi\Products;
 
+use Lepresk\MomoApi\ApiProduct;
 use Lepresk\MomoApi\ApiToken;
-use Lepresk\MomoApi\Exception\ExceptionFactory;
-use Lepresk\MomoApi\Exception\MomoException;
+use Lepresk\MomoApi\Exceptions\ExceptionFactory;
+use Lepresk\MomoApi\Exceptions\MomoException;
+use Lepresk\MomoApi\Models\AccountBalance;
+use Lepresk\MomoApi\Models\PaymentRequest;
+use Lepresk\MomoApi\Models\Transaction;
 use Lepresk\MomoApi\Utilities;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class MomoCollection
+class CollectionApi extends ApiProduct
 {
-    /**
-     * @var Config
-     */
-    private Config $config;
-
-    private string $environment;
-
-    private string $subscriptionKey;
-
-    private HttpClientInterface $client;
-
-    /**
-     * @param HttpClientInterface $client
-     * @param Config $config
-     * @param string $subscriptionKey
-     * @param string $environment
-     */
-    public function __construct(HttpClientInterface $client, string $subscriptionKey, Config $config, string $environment)
-    {
-        $this->config = $config;
-        $this->subscriptionKey = $subscriptionKey;
-        $this->environment = $environment;
-        $this->client = $client;
-    }
 
     /**
      * Request a payment from a consumer (Payer). The payer will be asked to authorize the payment.
@@ -79,7 +58,7 @@ class MomoCollection
         $response = $this->client->request('POST', '/collection/v1_0/requesttopay', [
             'json' => $data,
             'headers' => [
-                'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
+                'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
                 //'X-Callback-Url' => $this->config->getCallbackUri(),
                 'X-Reference-Id' => $xReferenceId,
                 'X-Target-Environment' => $this->environment,
@@ -122,7 +101,7 @@ class MomoCollection
         $response = $this->client->request('POST', "/collection/token/", [
             'auth_basic' => [$this->config->getApiUser(), $this->config->getApiKey()],
             'headers' => [
-                'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
+                'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
             ],
         ]);
 
@@ -166,7 +145,7 @@ class MomoCollection
         $token = $this->getAccessToken();
         $response = $this->client->request('GET', '/collection/v1_0/requesttopay/' . $paymentId, [
             'headers' => [
-                'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
+                'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
                 'X-Target-Environment' => $this->environment,
                 'Authorization' => 'Bearer ' . $token->getAccessToken(),
             ]
@@ -174,6 +153,35 @@ class MomoCollection
 
         if ($response->getStatusCode() === 200) {
             return Transaction::parse($response->toArray());
+        }
+
+        throw ExceptionFactory::create($response);
+    }
+
+    /**
+     * Get the balance of own account.
+     *
+     * @return AccountBalance
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws MomoException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function getAccountBalance(): AccountBalance
+    {
+        $token = $this->getAccessToken();
+        $response = $this->client->request('GET', '/collection/v1_0/account/balance', [
+            'headers' => [
+                'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                'X-Target-Environment' => $this->environment,
+                'Authorization' => 'Bearer ' . $token->getAccessToken(),
+            ]
+        ]);
+
+        if ($response->getStatusCode() === 200) {
+            return AccountBalance::parse($response->toArray(false));
         }
 
         throw ExceptionFactory::create($response);

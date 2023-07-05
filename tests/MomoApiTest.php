@@ -6,7 +6,6 @@ namespace Tests;
 use InvalidArgumentException;
 use Lepresk\MomoApi\MomoApi;
 use Symfony\Component\HttpClient\MockHttpClient;
-use Symfony\Component\HttpClient\Response\MockResponse;
 
 class MomoApiTest extends TestCase
 {
@@ -27,7 +26,7 @@ class MomoApiTest extends TestCase
     public function testFailGetCollectionWithoutConfig()
     {
         $this->expectException(InvalidArgumentException::class);
-        $momo = MomoApi::create('test');
+        $momo = MomoApi::create();
         $momo->collection();
     }
 
@@ -36,7 +35,7 @@ class MomoApiTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         MomoApi::setEnvironment(MomoApi::ENVIRONMENT_MTN_CONGO);
         $momo = MomoApi::create('test');
-        $momo->sandbox();
+        $momo->sandbox('subscriptionLey');
     }
 
     public function testUsingMockedClient()

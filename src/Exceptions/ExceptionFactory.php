@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Lepresk\MomoApi\Exception;
+namespace Lepresk\MomoApi\Exceptions;
 
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
