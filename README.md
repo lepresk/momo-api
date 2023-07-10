@@ -1,5 +1,10 @@
 # Librairie Momo API
 
+[![Static Badge](https://img.shields.io/badge/Stable-v1.0.1-blue)](https://packagist.org/packages/lepresk/momo-api)
+![GitHub](https://img.shields.io/github/license/lepresk/momo-api)
+
+
+
 La librairie **lepresk/momo-api** est une surcouche au-dessus de l'API officielle de Momo (Mobile Money). Elle facilite
 l'interaction avec la plateforme Momo et fournit des fonctionnalités supplémentaires pour simplifier l'intégration et la
 gestion des transactions financières.
