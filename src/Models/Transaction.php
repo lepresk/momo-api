@@ -85,9 +85,9 @@ class Transaction
         return $this->status === "FAILED";
     }
 
-    public function getAmount(): float
+    public function getAmount(): ?string
     {
-        return floatval($this->amount);
+        return $this->amount;
     }
 
     /**

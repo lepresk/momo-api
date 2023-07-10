@@ -14,26 +14,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-    public function setUp(): void
+    protected function baseUrl($env = MomoApi::ENVIRONMENT_SANDBOX)
     {
-        parent::setUp();
-
-        MomoApi::setEnvironment(MomoApi::ENVIRONMENT_SANDBOX);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $reflection = new ReflectionClass(MomoApi::class);
-        $instanceProperty = $reflection->getProperty('instance');
-        $instanceProperty->setAccessible(true);
-        $instanceProperty->setValue(null);
+        return MomoApi::getBaseUrl($env);
     }
 
     protected function provideClient(array $responses): HttpClientInterface
     {
-        return new MockHttpClient($responses, MomoApi::getBaseUrl());
+        return new MockHttpClient($responses, MomoApi::getBaseUrl(MomoApi::ENVIRONMENT_SANDBOX));
     }
 
     protected function assertValidGuidV4($guid)

@@ -9,32 +9,27 @@ use Symfony\Component\HttpClient\MockHttpClient;
 
 class MomoApiTest extends TestCase
 {
-    public function testEnvironnmentIsSandboxByDefault()
-    {
-        $this->assertEquals(MomoApi::$environment, MomoApi::ENVIRONMENT_SANDBOX);
-    }
-
     public function testBaseUrlByEnvironnment()
     {
-        $baseUrl = MomoApi::getBaseUrl();
+        $baseUrl = MomoApi::getBaseUrl(MomoApi::ENVIRONMENT_SANDBOX);
         $this->assertEquals(MomoApi::SANDBOX_URL, $baseUrl);
 
-        MomoApi::setEnvironment(MomoApi::ENVIRONMENT_MTN_CONGO);
-        $this->assertNotEquals(MomoApi::SANDBOX_URL, MomoApi::getBaseUrl());
+
+        $baseUrl = MomoApi::getBaseUrl(MomoApi::ENVIRONMENT_MTN_CONGO);
+        $this->assertEquals(MomoApi::PRODUCTION_URL, $baseUrl);
     }
 
     public function testFailGetCollectionWithoutConfig()
     {
         $this->expectException(InvalidArgumentException::class);
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->collection();
     }
 
     public function testFailUseSandboxInProduction()
     {
         $this->expectException(InvalidArgumentException::class);
-        MomoApi::setEnvironment(MomoApi::ENVIRONMENT_MTN_CONGO);
-        $momo = MomoApi::create('test');
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_MTN_CONGO);
         $momo->sandbox('subscriptionLey');
     }
 

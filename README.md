@@ -8,15 +8,18 @@ gestion des transactions financières.
 
 La librairie **lepresk/momo-api** vous permet de :
 
-- Interagir avec la sandbox Momo pour effectuer des tests de développement.
-- Interagir avec le produit Collection de Momo pour effectuer des paiements et vérifier l'état des transactions.
+| Produit      | Support                                                                                                                       |
+|--------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Sandbox      | - Créer un api user<br/>- Créer un api key<br/>- Récupérer les informations du compte                                         |
+| Collection   | - Récupérer le solde du compte<br/>- Faire un requestToPay<br/>- Vérifier le statut d'une transaction<br/>- Gérer le callback |
+| Disbursement | - *En cours d'implémentation*                                                                                                 |
 
 ## Configuration requise
 
 - PHP 7.4 ou supérieur.
-- Accès à l'API officielle de Momo et une clé d'abonnement valide.
+- Avoir un compte sur [Momo Developper](https://momodeveloper.mtn.com/) et récupérer la `subscriptionKey` ou avoir les clés d'API fournit par MTN si vous êtes en production.
 
-En production le `subscriptionKey`, le `apiUser` et le `apiKey` vous sont directement fournit par MTN
+> 📢 En production la `subscriptionKey`, le `apiUser` et le `apiKey` vous sont directement fourni par MTN
 
 ## Installation
 
@@ -42,12 +45,9 @@ require 'vendor/autoload.php';
 $subscriptionKey = 'SUBSCRIPTION KEY HERE';
 
 // Récupérer le client Momo
-$momo = MomoApi::create();
-
-// Définir l'environnement (MomoApi::ENVIRONMENT_SANDBOX par défaut)
-$momo->setEnvironment(MomoApi::ENVIRONMENT_SANDBOX);
+$momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
 ```
-// Assurez-vous de remplacer "SUBSCRIPTION KEY HERE" par votre clé d'abonnement réelle.
+> 📢 Assurez-vous de remplacer "SUBSCRIPTION KEY HERE" par votre clé d'abonnement réelle.
 
 Les environnements possibles
 
@@ -68,11 +68,9 @@ Les environnements possibles
 
 ### Intéragir avec la sandbox
 
-#### [Créer un api user](https://momodeveloper.mtn.com/docs/services/sandbox-provisioning-api/operations/post-v1_0-apiuser)
+#### Créer un api user
 
 ```php
-$momo->setEnvironment(MomoApi::ENVIRONMENT_SANDBOX);
-
 // Créer une api user
 $uuid = Utilities::guidv4(); // Ou tout autre guuidv4 valide
 $callbackHost = 'https://my-domain.com/callback';
@@ -81,7 +79,7 @@ $apiUser = $momo->sandbox($subscriptionKey)->createApiUser($uuid, $callbackHost)
 echo "Api user created: $apiUser\n";
 ```
 
-#### [Récupérer les informations d'un utilisateur](https://momodeveloper.mtn.com/docs/services/sandbox-provisioning-api/operations/get-v1_0-apiuser)
+#### Récupérer les informations d'un utilisateur
 
 ```php
 $data = $momo->sandbox($subscriptionKey)->getApiUser($apiUser);
@@ -92,7 +90,7 @@ print_r($data);
 // ]
 ```
 
-#### [Créer une api key](https://momodeveloper.mtn.com/docs/services/sandbox-provisioning-api/operations/post-v1_0-apiuser-apikey)
+#### Créer une api key
 
 ```php
 $apiKey = $momo->sandbox($subscriptionKey)->createApiKey($apiUser);
@@ -101,8 +99,13 @@ echo "Api token created: $apiKey\n";
 
 ### Intéragir avec le produit collection
 
+Avant d'utiliser l'API collection, vous devez définir la configuration.
+
 ```php
+// Créer un object Config
 $config = new \Lepresk\MomoApi\Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackHost);
+
+// Définir la configuration sur l'instance de MomoApi
 $momo->setupCollection($config);
 ```
 
@@ -114,6 +117,8 @@ $token = $momo->collection()->getAccessToken();
 echo $token->getAccessToken(); // Token
 echo $token->getExpiresIn(); // Date d'expiration du token
 ```
+
+> _Pour faire une requête requestToPay ou vérifier le statut de la transaction, vous n'avez pas besoin de demander un token, il est automatiquement généré à chaque transaction_
 
 #### Récupérer le solde du compte
 
@@ -130,9 +135,13 @@ echo $balance->getCurrency(); // Devise du compte
 <?php
 
 // Pour initier un paiement requestToPay
-$request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
+$request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', 'Payer message', 'Payer note');
 $paymentId = $momo->collection()->requestToPay($request);
 ```
+
+> Pour obtenir les numéros de téléphones de test, veuillez vous référer à [https://momodeveloper.mtn.com/api-documentation/testing/](https://momodeveloper.mtn.com/api-documentation/testing/)
+
+`$paymentId` est l'id du paiement qui vient d'être éffectuer, vous pouvez l'enregistrer dans votre base de données pour l'utiliser plus tard (vérifier le statut du paiement par exemple)
 
 #### Vérifier le status d'une transaction
 
@@ -142,6 +151,19 @@ $paymentId = $momo->collection()->requestToPay($request);
 $transaction = $momo->collection()->checkRequestStatus($paymentId);
 
 echo $transaction->getStatus(); // Pour obtenir le statut de la transaction
+```
+
+#### Gérer le hook du callback
+
+```php
+<?php
+use Lepresk\MomoApi\Models\Transaction;
+
+// Créer un objet transaction depuis le tableau GET
+$transaction = Transaction::parse($_GET);
+
+echo $transaction->getStatus(); // Pour obtenir le statut de la transaction
+echo $transaction->getAmount(); // Pour récuperer le montant de la transaction
 ```
 
 ## Documentation supplémentaire
