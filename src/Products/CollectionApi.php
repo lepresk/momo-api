@@ -59,7 +59,6 @@ class CollectionApi extends ApiProduct
             'json' => $data,
             'headers' => [
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
-                //'X-Callback-Url' => $this->config->getCallbackUri(),
                 'X-Reference-Id' => $xReferenceId,
                 'X-Target-Environment' => $this->environment,
                 'Authorization' => 'Bearer ' . $token->getAccessToken(),

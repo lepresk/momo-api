@@ -26,7 +26,7 @@ class SandboxApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->sandbox($subscriptionKey)->createApiKey('toto');
     }
 
@@ -38,7 +38,7 @@ class SandboxApiTest extends TestCase
         $expectedRequests = [
             function ($method, $url, $options) use ($callbackHost, $uuid): MockResponse {
                 $this->assertSame('POST', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . '/v1_0/apiuser', $url);
+                $this->assertSame($this->baseUrl() . '/v1_0/apiuser', $url);
 
                 $this->assertSame(json_encode(["providerCallbackHost" => $callbackHost]), $options['body']);
                 $this->assertContains("X-Reference-Id: $uuid", $options['headers']);
@@ -48,7 +48,7 @@ class SandboxApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $result = $momo->sandbox('testSubKey')->createApiUser($uuid, $callbackHost);
 
         $this->assertEquals($uuid, $result);
@@ -68,7 +68,7 @@ class SandboxApiTest extends TestCase
         $this->expectException(ConflictException::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->sandbox('testSubKey')->createApiUser($uuid, $callbackHost);
     }
 
@@ -85,7 +85,7 @@ class SandboxApiTest extends TestCase
         $this->expectException(BadRequestExeption::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->sandbox('testSubKey')->createApiUser('badUUID', $callbackHost);
     }
 
@@ -100,14 +100,14 @@ class SandboxApiTest extends TestCase
         $expectedRequests = [
             function ($method, $url) use ($user, $uuid): MockResponse {
                 $this->assertSame('GET', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . '/v1_0/apiuser/' . $uuid, $url);
+                $this->assertSame($this->baseUrl() . '/v1_0/apiuser/' . $uuid, $url);
 
                 return new MockResponse(json_encode($user), ['http_code' => 200]);
             },
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $result = $momo->sandbox('testSubKey')->getApiUser($uuid);
 
         $this->assertEquals($user, $result);
@@ -130,7 +130,7 @@ class SandboxApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->sandbox('testSubKey')->getApiUser($uuid);
     }
 
@@ -141,13 +141,13 @@ class SandboxApiTest extends TestCase
         $expectedRequests = [
             function ($method, $url) use ($apiUser): MockResponse {
                 $this->assertSame('POST', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . "/v1_0/apiuser/$apiUser/apikey", $url);
+                $this->assertSame($this->baseUrl() . "/v1_0/apiuser/$apiUser/apikey", $url);
                 return new MockResponse('{"apiKey": "aKey"}', ['http_code' => 201]);
             },
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $result = $momo->sandbox('testSubKey')->createApiKey($apiUser);
 
         $this->assertSame($result, 'aKey');
@@ -166,7 +166,7 @@ class SandboxApiTest extends TestCase
         $this->expectException(MomoException::class);
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->sandbox('testSubKey')->createApiKey($apiUser);
     }
 }

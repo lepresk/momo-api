@@ -25,7 +25,7 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection($subscriptionKey, "apiUser", "apiKey", "aCalllback"));
         $momo->collection()->getAccessToken();
     }
@@ -41,14 +41,14 @@ class CollectionApiTest extends TestCase
         $expectedRequests = [
             function ($method, $url, $options) use ($sampleToken): MockResponse {
                 $this->assertSame('POST', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . '/collection/token/', $url);
+                $this->assertSame($this->baseUrl() . '/collection/token/', $url);
                 $this->assertArrayHasKey('authorization', $options['normalized_headers']);
                 return new MockResponse(json_encode($sampleToken), ['http_code' => 200]);
             },
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $token = $momo->collection()->getAccessToken();
 
@@ -60,7 +60,7 @@ class CollectionApiTest extends TestCase
         $expectedRequests = [
             function ($method, $url, $options): MockResponse {
                 $this->assertSame('POST', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . '/collection/token/', $url);
+                $this->assertSame($this->baseUrl() . '/collection/token/', $url);
                 $this->assertArrayHasKey('authorization', $options['normalized_headers']);
                 return new MockResponse('{}', ['http_code' => 401]);
             },
@@ -68,7 +68,7 @@ class CollectionApiTest extends TestCase
 
         $this->expectException(MomoException::class);
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $momo->collection()->getAccessToken();
     }
@@ -79,14 +79,14 @@ class CollectionApiTest extends TestCase
             $this->provideTokenResponse(),
             function ($method, $url, $options): MockResponse {
                 $this->assertSame('POST', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . '/collection/v1_0/requesttopay', $url);
+                $this->assertSame($this->baseUrl() . '/collection/v1_0/requesttopay', $url);
                 $this->assertArrayHasKey('authorization', $options['normalized_headers']);
                 return new MockResponse('{}', ['http_code' => 202]);
             },
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
@@ -99,7 +99,7 @@ class CollectionApiTest extends TestCase
     private function provideTokenResponse(): \Closure
     {
         return function ($method, $url): MockResponse {
-            $this->assertSame(MomoApi::getBaseUrl() . '/collection/token/', $url);
+            $this->assertSame($this->baseUrl() . '/collection/token/', $url);
             return new MockResponse(json_encode([
                 'access_token' => 'testToken',
                 'expires_in' => 3600,
@@ -118,7 +118,7 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
@@ -148,13 +148,13 @@ class CollectionApiTest extends TestCase
             $this->provideTokenResponse(),
             function ($method, $url) use ($paymentId, $data): MockResponse {
                 $this->assertSame('GET', $method);
-                $this->assertSame(MomoApi::getBaseUrl() . "/collection/v1_0/requesttopay/$paymentId", $url);
+                $this->assertSame($this->baseUrl() . "/collection/v1_0/requesttopay/$paymentId", $url);
                 return new MockResponse(json_encode($data), ['http_code' => 200]);
             },
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create();
+        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
         $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
         $transaction = $momo->collection()->checkRequestStatus($paymentId);
 

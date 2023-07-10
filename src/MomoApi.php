@@ -29,22 +29,17 @@ class MomoApi
     public const SANDBOX_URL = 'https://sandbox.momodeveloper.mtn.com';
     public const PRODUCTION_URL = 'https://proxy.momoapi.mtn.com';
 
-    public static string $environment = self::ENVIRONMENT_SANDBOX;
+    public string $environment;
 
-    /**
-     * Instance singleton
-     *
-     * @var MomoApi|null
-     */
-    private static ?MomoApi $instance = null;
     private static ?HttpClientInterface $client = null;
 
     private ?Config $collectionConfig = null;
 
     private ?Config $disbursementConfig = null;
 
-    private function __construct()
+    private function __construct(string $environment)
     {
+        $this->environment = $environment;
     }
 
     /**
@@ -67,35 +62,25 @@ class MomoApi
     /**
      * Class factory
      *
+     * @param string $environment
      * @return MomoApi
      */
-    public static function create(): MomoApi
+    public static function create(string $environment): MomoApi
     {
-        if (!self::$instance) {
-            if (static::$client === null) {
-                static::$client = HttpClient::create([
-                    'base_uri' => static::getBaseUrl(),
-                ]);
-            }
-            self::$instance = new self();
+        if (static::$client === null) {
+            static::$client = HttpClient::create([
+                'base_uri' => static::getBaseUrl($environment),
+            ]);
         }
-        return self::$instance;
+        return new self($environment);
     }
 
-    public static function getBaseUrl(): string
+    public static function getBaseUrl($environment): string
     {
-        if (self::$environment === MomoApi::ENVIRONMENT_SANDBOX) {
+        if ($environment === MomoApi::ENVIRONMENT_SANDBOX) {
             return self::SANDBOX_URL;
         }
         return self::PRODUCTION_URL;
-    }
-
-    /**
-     * @param string $environment
-     */
-    public static function setEnvironment(string $environment): void
-    {
-        self::$environment = $environment;
     }
 
     public function setupCollection(Config $config): void
@@ -119,7 +104,7 @@ class MomoApi
             throw new InvalidArgumentException("Collection must be setup with `MomoApi::setupCollection` before call `MomoApi::collection`");
         }
 
-        return new CollectionApi(static::$client, self::$environment, $this->collectionConfig);
+        return new CollectionApi(static::$client, $this->environment, $this->collectionConfig);
     }
 
     /**
@@ -133,7 +118,7 @@ class MomoApi
             throw new InvalidArgumentException("Disbursement must be setup with `MomoApi::setupDisbursement` before call `MomoApi::disbursement`");
         }
 
-        return new DisbursementApi(static::$client, self::$environment, $this->disbursementConfig);
+        return new DisbursementApi(static::$client, $this->environment, $this->disbursementConfig);
     }
 
     /**
@@ -144,10 +129,10 @@ class MomoApi
      */
     public function sandbox(string $subscriptionKey): SandboxApi
     {
-        if (self::$environment !== self::ENVIRONMENT_SANDBOX) {
+        if ($this->environment !== self::ENVIRONMENT_SANDBOX) {
             throw new InvalidArgumentException("Environment must be " . self::ENVIRONMENT_SANDBOX);
         }
 
-        return new SandboxApi(static::$client, self::$environment, Config::sandbox($subscriptionKey));
+        return new SandboxApi(static::$client, $this->environment, Config::sandbox($subscriptionKey));
     }
 }
