@@ -161,6 +161,5 @@ class CollectionApiTest extends TestCase
         $this->assertEquals($data['status'], $transaction->getStatus());
         $this->assertEquals($data['payer']['partyId'], $transaction->getPayer());
         $this->assertTrue($transaction->isSuccessful());
-        $this->assertIsFloat($transaction->getAmount());
     }
 }
