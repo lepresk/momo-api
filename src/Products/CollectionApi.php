@@ -27,7 +27,7 @@ class CollectionApi extends ApiProduct
      * ### Sample usage
      *
      * ```
-     * $request = new \Lepresk\MomoApi\Collection\PaymentRequest(
+     * $request = new Lepresk\MomoApi\Models\PaymentRequest(
      *    2500,
      *   'EUR',
      *   'ORDER-10',
@@ -53,10 +53,8 @@ class CollectionApi extends ApiProduct
 
         $token = $this->getAccessToken();
 
-        $data = $paymentRequest->toArray();
-
         $response = $this->client->request('POST', '/collection/v1_0/requesttopay', [
-            'json' => $data,
+            'json' => $paymentRequest->toArray(),
             'headers' => [
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
                 'X-Reference-Id' => $xReferenceId,

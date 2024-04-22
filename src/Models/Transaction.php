@@ -29,6 +29,7 @@ class Transaction
      * @param string|null $payerMessage
      * @param string|null $payeeNote
      * @param string $status
+     * @param string|null $reason
      */
     public function __construct(?string $financialTransactionId, ?string $externalId, ?string $amount, string $currency, array $payer, ?string $payerMessage, ?string $payeeNote, string $status, ?string $reason)
     {
