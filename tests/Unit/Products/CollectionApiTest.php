@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Products;
+namespace Tests\Unit\Products;
 
 use Lepresk\MomoApi\Config;
 use Lepresk\MomoApi\Exceptions\MomoException;

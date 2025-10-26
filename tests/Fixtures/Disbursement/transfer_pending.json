@@ -1,0 +1,13 @@
+{
+  "amount": "250",
+  "currency": "XAF",
+  "financialTransactionId": "123987456",
+  "externalId": "TRX-12345",
+  "payee": {
+    "partyIdType": "MSISDN",
+    "partyId": "242068511358"
+  },
+  "payerMessage": "Transfer payment",
+  "payeeNote": "Salary payment",
+  "status": "PENDING"
+}

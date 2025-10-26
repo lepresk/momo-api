@@ -261,8 +261,23 @@ if ($transaction->isFailed()) {
 
 ## Testing
 
+The package includes two types of tests:
+
+**Unit Tests** - Fast tests with mocked HTTP responses:
 ```bash
 composer test
+# or run specific suite
+vendor/bin/phpunit --testsuite Unit
+```
+
+**Fixture Tests** - Validate parsing of real MTN API responses:
+```bash
+vendor/bin/phpunit --testsuite Fixtures
+```
+
+Run PHPStan analysis:
+```bash
+composer phpstan
 ```
 
 ## Production Notes

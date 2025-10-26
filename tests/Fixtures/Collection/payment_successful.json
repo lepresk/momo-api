@@ -1,0 +1,13 @@
+{
+  "amount": "2500",
+  "currency": "EUR",
+  "financialTransactionId": "987654321",
+  "externalId": "ORDER-456",
+  "payer": {
+    "partyIdType": "MSISDN",
+    "partyId": "46733123453"
+  },
+  "payerMessage": "Payment message",
+  "payeeNote": "A note",
+  "status": "SUCCESSFUL"
+}

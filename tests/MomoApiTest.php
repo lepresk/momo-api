@@ -31,7 +31,7 @@ class MomoApiTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $momo = MomoApi::create(MomoApi::ENVIRONMENT_MTN_CONGO);
-        $momo->sandbox('subscriptionLey');
+        $momo->sandbox('subscriptionKey');
     }
 
     public function testUsingMockedClient()

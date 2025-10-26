@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Products;
+namespace Tests\Unit\Products;
 
 use Lepresk\MomoApi\Models\RefundRequest;
 use Lepresk\MomoApi\Models\TransferRequest;

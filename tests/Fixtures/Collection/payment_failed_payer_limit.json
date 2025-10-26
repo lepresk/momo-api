@@ -1,0 +1,16 @@
+{
+  "amount": "10000",
+  "currency": "XAF",
+  "externalId": "ORDER-999",
+  "payer": {
+    "partyIdType": "MSISDN",
+    "partyId": "242065599123"
+  },
+  "payerMessage": "",
+  "payeeNote": "",
+  "status": "FAILED",
+  "reason": {
+    "code": "PAYER_LIMIT_REACHED",
+    "message": "The payer's limit has been breached."
+  }
+}

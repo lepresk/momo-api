@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Products;
+namespace Tests\Unit\Products;
 
 use Lepresk\MomoApi\Exceptions\BadRequestExeption;
 use Lepresk\MomoApi\Exceptions\ConflictException;

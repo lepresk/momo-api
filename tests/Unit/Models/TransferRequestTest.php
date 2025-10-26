@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Tests\Models;
+namespace Tests\Unit\Models;
 
 use Lepresk\MomoApi\Models\TransferRequest;
 use Tests\TestCase;
