@@ -1,13 +1,16 @@
-name: PHPUnit Tests
+name: Tests
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
   run_tests:
-    name: Run PHPUnit Tests
+    name: Run Tests & Static Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +25,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-progress
+
+      - name: Run PHPStan
+        run: composer phpstan
 
       - name: Run PHPUnit
         run: ./vendor/bin/phpunit --configuration phpunit.xml
