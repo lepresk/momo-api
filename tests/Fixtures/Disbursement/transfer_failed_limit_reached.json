@@ -1,0 +1,14 @@
+{
+  "amount": "100",
+  "currency": "UGX",
+  "externalId": "83453",
+  "payee": {
+    "partyIdType": "MSISDN",
+    "partyId": "4609274685"
+  },
+  "status": "FAILED",
+  "reason": {
+    "code": "PAYER_LIMIT_REACHED",
+    "message": "The payer's limit has been breached."
+  }
+}

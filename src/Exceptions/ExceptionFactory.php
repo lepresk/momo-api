@@ -17,7 +17,7 @@ class ExceptionFactory
             case 401:
                 return new InvalidSubscriptionKeyException($content['message'] ?? null);
             case 404:
-                return new RessourceNotFoundException($content['message'] ?? '', $response->getStatusCode());
+                return new ResourceNotFoundException($content['message'] ?? '', $response->getStatusCode());
             case 409:
                 return new ConflictException($content['message'] ?? null);
             case 500:

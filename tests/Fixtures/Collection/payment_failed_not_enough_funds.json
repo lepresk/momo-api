@@ -1,0 +1,16 @@
+{
+  "amount": "5000",
+  "currency": "XAF",
+  "externalId": "ORDER-789",
+  "payer": {
+    "partyIdType": "MSISDN",
+    "partyId": "242068511358"
+  },
+  "payerMessage": "Payment attempt",
+  "payeeNote": "",
+  "status": "FAILED",
+  "reason": {
+    "code": "NOT_ENOUGH_FUNDS",
+    "message": "The payer does not have enough funds."
+  }
+}

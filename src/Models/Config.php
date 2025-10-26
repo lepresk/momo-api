@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Lepresk\MomoApi;
+namespace Lepresk\MomoApi\Models;
 
 class Config
 {

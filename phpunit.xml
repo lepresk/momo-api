@@ -5,8 +5,13 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="Default">
-            <directory>./tests</directory>
+        <testsuite name="Unit">
+            <directory>./tests/Unit</directory>
+            <file>./tests/MomoApiTest.php</file>
+            <file>./tests/UuidTest.php</file>
+        </testsuite>
+        <testsuite name="Fixtures">
+            <directory>./tests/FixtureTests</directory>
         </testsuite>
     </testsuites>
     <source>

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Lepresk\MomoApi;
+namespace Lepresk\MomoApi\Support;
 
 use Exception;
 
-class Utilities
+class Uuid
 {
     /**
      * Generate random GUIDv4
@@ -13,7 +13,7 @@ class Utilities
      * @return string
      * @throws Exception
      */
-    public static function guidv4(): string
+    public static function v4(): string
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         $data = random_bytes(16);

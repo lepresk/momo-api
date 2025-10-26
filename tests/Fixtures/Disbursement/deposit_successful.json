@@ -1,0 +1,13 @@
+{
+  "amount": "500",
+  "currency": "EUR",
+  "financialTransactionId": "789456123",
+  "externalId": "DEP-67890",
+  "payee": {
+    "partyIdType": "MSISDN",
+    "partyId": "46733123454"
+  },
+  "payerMessage": "Deposit",
+  "payeeNote": "Account credit",
+  "status": "SUCCESSFUL"
+}

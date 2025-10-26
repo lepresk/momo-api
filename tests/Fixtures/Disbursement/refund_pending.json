@@ -1,0 +1,12 @@
+{
+  "amount": "150",
+  "currency": "XAF",
+  "externalId": "REF-98765",
+  "payee": {
+    "partyIdType": "MSISDN",
+    "partyId": "242068511358"
+  },
+  "payerMessage": "Refund request",
+  "payeeNote": "Order cancellation",
+  "status": "PENDING"
+}

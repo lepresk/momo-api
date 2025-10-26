@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Models;
 
-class PaymentRequest
+class TransferRequest
 {
     /**
      * @var string
@@ -18,54 +18,54 @@ class PaymentRequest
     /**
      * @var string
      */
-    private $externalId;
+    private string $externalId;
 
     /**
-     * Payer MSISDN (phone number in international format with country code and wihhout '+')
+     * Payee MSISDN (phone number in international format with country code and without '+')
      *  e.g.`242068511358` Where `242` is a country code and `068511358` is a phone number
      * @var string
      */
-    private $payer;
+    private string $payee;
 
     /**
      * @var string
      */
-    private $payerMessage;
+    private string $payerMessage;
 
     /**
      * @var string
      */
-    private $payerNote;
+    private string $payeeNote;
 
     /**
      * @param string $amount
      * @param string $currency
      * @param string $externalId
-     * @param string $payer
+     * @param string $payee
      * @param string $payerMessage
-     * @param string $payerNote
+     * @param string $payeeNote
      */
     public function __construct(
         string $amount,
         string $currency,
         string $externalId,
-        string $payer,
-        string $payerMessage = '',
-        string $payerNote = ''
+        string $payee,
+        string $payerMessage,
+        string $payeeNote
     ) {
         $this->amount = $amount;
         $this->currency = $currency;
         $this->externalId = $externalId;
-        $this->payer = $payer;
+        $this->payee = $payee;
         $this->payerMessage = $payerMessage;
-        $this->payerNote = $payerNote;
+        $this->payeeNote = $payeeNote;
     }
 
     /**
      * Static factory with sensible defaults
      *
      * @param string $amount
-     * @param string $payer
+     * @param string $payee
      * @param string $externalId
      * @param string $currency
      * @param string $payerMessage
@@ -74,13 +74,13 @@ class PaymentRequest
      */
     public static function make(
         string $amount,
-        string $payer,
+        string $payee,
         string $externalId,
         string $currency = 'XAF',
         string $payerMessage = '',
         string $payeeNote = ''
     ): self {
-        return new self($amount, $currency, $externalId, $payer, $payerMessage, $payeeNote);
+        return new self($amount, $currency, $externalId, $payee, $payerMessage, $payeeNote);
     }
 
     /**
@@ -110,9 +110,9 @@ class PaymentRequest
     /**
      * @return string
      */
-    public function getPayer(): string
+    public function getPayee(): string
     {
-        return $this->payer;
+        return $this->payee;
     }
 
     /**
@@ -123,13 +123,12 @@ class PaymentRequest
         return $this->payerMessage;
     }
 
-
     /**
      * @return string
      */
-    public function getPayerNote(): string
+    public function getPayeeNote(): string
     {
-        return $this->payerNote;
+        return $this->payeeNote;
     }
 
     public function toArray(): array
@@ -138,12 +137,12 @@ class PaymentRequest
             "amount" => $this->amount,
             "currency" => $this->currency,
             "externalId" => $this->externalId,
-            "payer" => [
+            "payee" => [
                 "partyIdType" => "MSISDN",
-                "partyId" => $this->payer,
+                "partyId" => $this->payee,
             ],
             "payerMessage" => $this->payerMessage,
-            "payeeNote" => $this->payerNote,
+            "payeeNote" => $this->payeeNote,
         ];
     }
 }
