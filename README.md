@@ -1,6 +1,6 @@
 # Librairie Momo API
 
-[![Static Badge](https://img.shields.io/badge/Stable-v1.0.1-blue)](https://packagist.org/packages/lepresk/momo-api)
+[![Static Badge](https://img.shields.io/badge/Stable-v1.1.0-blue)](https://packagist.org/packages/lepresk/momo-api)
 ![GitHub](https://img.shields.io/github/license/lepresk/momo-api)
 
 A powerful and professional PHP wrapper for integrating MTN Mobile Money API. Supports **Collection** (receive payments) and **Disbursement** (send money) operations.
