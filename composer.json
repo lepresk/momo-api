@@ -1,15 +1,29 @@
 {
     "name": "lepresk/momo-api",
-    "description": "A powerful and user-friendly wrapper for integrating the MoMo (Mobile Money) API into PHP applications.",
+    "description": "PHP library for MTN Mobile Money (MoMo) API. Receive payments (Collection), send money (Disbursement), and manage mobile transactions in Africa.",
+    "type": "library",
     "keywords": [
         "momo",
         "mobile money",
-        "api",
-        "php",
-        "financial transactions"
+        "mtn mobile money",
+        "payment",
+        "payment gateway",
+        "africa payment",
+        "collection",
+        "disbursement",
+        "transfer",
+        "remittance",
+        "mtn",
+        "mobile payment api"
     ],
     "homepage": "https://github.com/lepresk/momo-api",
-    "minimum-stability": "dev",
+    "readme": "README.md",
+    "support": {
+        "issues": "https://github.com/lepresk/momo-api/issues",
+        "source": "https://github.com/lepresk/momo-api",
+        "docs": "https://github.com/lepresk/momo-api#readme"
+    },
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
