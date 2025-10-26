@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Lepresk\MomoApi\Products;
 
 use Lepresk\MomoApi\Abstracts\AbstractApiProduct;
-use Lepresk\MomoApi\Concerns\InteractsWithHttp;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
@@ -20,8 +19,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class CollectionApi extends AbstractApiProduct
 {
-    use InteractsWithHttp;
-
     /**
      * Request a payment from a consumer (Payer). The payer will be asked to authorize the payment.
      * The transaction will be executed once the payer has authorized the payment.

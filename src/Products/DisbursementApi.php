@@ -3,7 +3,6 @@
 namespace Lepresk\MomoApi\Products;
 
 use Lepresk\MomoApi\Abstracts\AbstractApiProduct;
-use Lepresk\MomoApi\Concerns\InteractsWithHttp;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
@@ -21,8 +20,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class DisbursementApi extends AbstractApiProduct
 {
-    use InteractsWithHttp;
-
     /**
      * Create an access token which can then be used to authorize and authenticate
      * towards the other end-points of the API.
