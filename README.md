@@ -3,186 +3,285 @@
 [![Static Badge](https://img.shields.io/badge/Stable-v1.0.1-blue)](https://packagist.org/packages/lepresk/momo-api)
 ![GitHub](https://img.shields.io/github/license/lepresk/momo-api)
 
+A powerful and professional PHP wrapper for integrating MTN Mobile Money API. Supports **Collection** (receive payments) and **Disbursement** (send money) operations.
 
+## Features
 
-La librairie **lepresk/momo-api** est une surcouche au-dessus de l'API officielle de Momo (Mobile Money). Elle facilite
-l'interaction avec la plateforme Momo et fournit des fonctionnalités supplémentaires pour simplifier l'intégration et la
-gestion des transactions financières.
+| Product | Supported Operations |
+|---------|---------------------|
+| **Collection** | Request payments from customers, Check payment status, Get account balance |
+| **Disbursement** | Transfer money, Deposit funds, Process refunds, Get account balance |
+| **Sandbox** | Create API users, Generate API keys, Test environment support |
 
-## Fonctionnalités
+## Requirements
 
-La librairie **lepresk/momo-api** vous permet de :
-
-| Produit      | Support                                                                                                                       |
-|--------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Sandbox      | - Créer un api user<br/>- Créer un api key<br/>- Récupérer les informations du compte                                         |
-| Collection   | - Récupérer le solde du compte<br/>- Faire un requestToPay<br/>- Vérifier le statut d'une transaction<br/>- Gérer le callback |
-| Disbursement | - *En cours d'implémentation*                                                                                                 |
-
-## Configuration requise
-
-- PHP 7.4 ou supérieur.
-- Avoir un compte sur [Momo Developper](https://momodeveloper.mtn.com/) et récupérer la `subscriptionKey` ou avoir les clés d'API fournit par MTN si vous êtes en production.
-
-> 📢 En production la `subscriptionKey`, le `apiUser` et le `apiKey` vous sont directement fourni par MTN
+- PHP 7.4 or higher
+- MTN MoMo Developer Account ([Sign up](https://momodeveloper.mtn.com/))
+- Subscription Key (sandbox or production)
 
 ## Installation
-
-Pour installer la librairie **lepresk/momo-api**, vous pouvez utiliser [Composer](https://getcomposer.org/) :
 
 ```bash
 composer require lepresk/momo-api
 ```
 
-## Utilisation
+## Quick Start
 
-Voici un exemple simple d'utilisation de la librairie :
+### Collection API (Receive Payments)
+
+```php
+<?php
+use Lepresk\MomoApi\MomoApi;
+
+// Simple fluent configuration
+$collection = MomoApi::collection([
+    'environment' => 'sandbox', // or 'mtncongo', 'mtnuganda', etc.
+    'subscription_key' => 'YOUR_SUBSCRIPTION_KEY',
+    'api_user' => 'YOUR_API_USER',
+    'api_key' => 'YOUR_API_KEY',
+    'callback_url' => 'https://yourdomain.com/callback'
+]);
+
+// Quick payment - 3 parameters
+$paymentId = $collection->quickPay('1000', '242068511358', 'ORDER-123');
+
+// Check payment status
+$transaction = $collection->getPaymentStatus($paymentId);
+
+if ($transaction->isSuccessful()) {
+    echo "Payment of {$transaction->getAmount()} received!";
+}
+```
+
+### Disbursement API (Send Money)
+
+```php
+<?php
+use Lepresk\MomoApi\MomoApi;
+use Lepresk\MomoApi\Models\TransferRequest;
+
+$disbursement = MomoApi::disbursement([
+    'environment' => 'sandbox',
+    'subscription_key' => 'YOUR_SUBSCRIPTION_KEY',
+    'api_user' => 'YOUR_API_USER',
+    'api_key' => 'YOUR_API_KEY',
+    'callback_url' => 'https://yourdomain.com/callback'
+]);
+
+// Transfer money to a beneficiary
+$transfer = TransferRequest::make('5000', '242068511358', 'SALARY-001');
+$transferId = $disbursement->transfer($transfer);
+
+// Check transfer status
+$result = $disbursement->getTransferStatus($transferId);
+```
+
+## Sandbox Setup
 
 ```php
 <?php
 use Lepresk\MomoApi\MomoApi;
 use Lepresk\MomoApi\Utilities;
 
-
-require 'vendor/autoload.php';
-
-// Récupérer la subscriptionKey dans son profile ou utiliser celui fournit par MTN si vous êtes en production
-$subscriptionKey = 'SUBSCRIPTION KEY HERE';
-
-// Récupérer le client Momo
 $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-```
-> 📢 Assurez-vous de remplacer "SUBSCRIPTION KEY HERE" par votre clé d'abonnement réelle.
+$subscriptionKey = 'YOUR_SANDBOX_SUBSCRIPTION_KEY';
 
-Les environnements possibles
-
-| Constante                            |      Valeur      | Default |
-|--------------------------------------|:----------------:|:-------:|
-| `MomoApi::ENVIRONMENT_MTN_CONGO`     |     mtncongo     |         |
-| `MomoApi::ENVIRONMENT_MTN_UGANDA`    |    mtnuganda     |         |
-| `MomoApi::ENVIRONMENT_MTN_GHANA`     |     mtnghana     |         |
-| `MomoApi::ENVIRONMENT_IVORY_COAST`   |  mtnivorycoast   |         |
-| `MomoApi::ENVIRONMENT_ZAMBIA`        |    mtnzambia     |         |
-| `MomoApi::ENVIRONMENT_CAMEROON`      |   mtncameroon    |         |
-| `MomoApi::ENVIRONMENT_BENIN`         |     mtnbenin     |         |
-| `MomoApi::ENVIRONMENT_SWAZILAND`     |   mtnswaziland   |         |
-| `MomoApi::ENVIRONMENT_GUINEACONAKRY` | mtnguineaconakry |         |
-| `MomoApi::ENVIRONMENT_SOUTHAFRICA`   |  mtnsouthafrica  |         |
-| `MomoApi::ENVIRONMENT_LIBERIA`       |    mtnliberia    |         |
-| `MomoApi::ENVIRONMENT_SANDBOX`       |     sandbox      | **OUI** |
-
-### Intéragir avec la sandbox
-
-#### Créer un api user
-
-```php
-// Créer une api user
-$uuid = Utilities::guidv4(); // Ou tout autre guuidv4 valide
-$callbackHost = 'https://my-domain.com/callback';
-
+// 1. Create API User
+$uuid = Utilities::guidv4();
+$callbackHost = 'https://yourdomain.com/callback';
 $apiUser = $momo->sandbox($subscriptionKey)->createApiUser($uuid, $callbackHost);
-echo "Api user created: $apiUser\n";
-```
 
-#### Récupérer les informations d'un utilisateur
-
-```php
-$data = $momo->sandbox($subscriptionKey)->getApiUser($apiUser);
-print_r($data);
-// [
-//      'providerCallbackHost' => 'https://my-domain.com/callback',
-//      'targetEnvironment' => 'sandbox',
-// ]
-```
-
-#### Créer une api key
-
-```php
+// 2. Create API Key
 $apiKey = $momo->sandbox($subscriptionKey)->createApiKey($apiUser);
-echo "Api token created: $apiKey\n";
+
+// Now use these credentials for Collection/Disbursement
 ```
 
-### Intéragir avec le produit collection
+## Advanced Usage
 
-Avant d'utiliser l'API collection, vous devez définir la configuration.
+### Collection API - Full Example
 
 ```php
-// Créer un object Config
-$config = new \Lepresk\MomoApi\Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackHost);
+use Lepresk\MomoApi\MomoApi;
+use Lepresk\MomoApi\Models\PaymentRequest;
 
-// Définir la configuration sur l'instance de MomoApi
-$momo->setupCollection($config);
+$collection = MomoApi::collection([
+    'environment' => 'mtncongo',
+    'subscription_key' => env('MOMO_SUBSCRIPTION_KEY'),
+    'api_user' => env('MOMO_API_USER'),
+    'api_key' => env('MOMO_API_KEY'),
+    'callback_url' => 'https://yourdomain.com/webhook/momo'
+]);
+
+// Custom payment request
+$request = new PaymentRequest(
+    amount: '2500',
+    currency: 'XAF',
+    externalId: 'ORDER-456',
+    payer: '242068511358',
+    payerMessage: 'Payment for order #456',
+    payeeNote: 'Thank you for your purchase'
+);
+
+$paymentId = $collection->requestToPay($request);
+
+// Get account balance
+$balance = $collection->getBalance();
+echo "Available: {$balance->getAvailableBalance()} {$balance->getCurrency()}";
 ```
 
-#### Obtenir un token oauth
+### Disbursement API - Full Example
 
 ```php
-$token = $momo->collection()->getAccessToken();
+use Lepresk\MomoApi\MomoApi;
+use Lepresk\MomoApi\Models\TransferRequest;
+use Lepresk\MomoApi\Models\RefundRequest;
 
-echo $token->getAccessToken(); // Token
-echo $token->getExpiresIn(); // Date d'expiration du token
+$disbursement = MomoApi::disbursement([...config...]);
+
+// Transfer
+$transfer = new TransferRequest(
+    amount: '10000',
+    currency: 'XAF',
+    externalId: 'PAYOUT-789',
+    payee: '242068511358',
+    payerMessage: 'Monthly salary',
+    payeeNote: 'Salary payment for June'
+);
+$transferId = $disbursement->transfer($transfer);
+
+// Refund
+$refund = RefundRequest::make('1000', $originalTransactionId, 'REFUND-123');
+$refundId = $disbursement->refund($refund);
+
+// Check balance
+$balance = $disbursement->getBalance();
 ```
 
-> _Pour faire une requête requestToPay ou vérifier le statut de la transaction, vous n'avez pas besoin de demander un token, il est automatiquement généré à chaque transaction_
-
-#### Récupérer le solde du compte
-
-```php
-$balance = $momo->collection()->getAccountBalance();
-
-echo $balance->getAvailableBalance(); // Solde du compte
-echo $balance->getCurrency(); // Devise du compte
-```
-
-#### Faire une requête requestToPay
-
-```php
-<?php
-
-// Pour initier un paiement requestToPay
-$request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', 'Payer message', 'Payer note');
-$paymentId = $momo->collection()->requestToPay($request);
-```
-
-> Pour obtenir les numéros de téléphones de test, veuillez vous référer à [https://momodeveloper.mtn.com/api-documentation/testing/](https://momodeveloper.mtn.com/api-documentation/testing/)
-
-`$paymentId` est l'id du paiement qui vient d'être éffectuer, vous pouvez l'enregistrer dans votre base de données pour l'utiliser plus tard (vérifier le statut du paiement par exemple)
-
-#### Vérifier le status d'une transaction
-
-```php
-<?php
-// Vérifier le statut du paiement
-$transaction = $momo->collection()->checkRequestStatus($paymentId);
-
-echo $transaction->getStatus(); // Pour obtenir le statut de la transaction
-```
-
-#### Gérer le hook du callback
+### Handling Callbacks
 
 ```php
 <?php
 use Lepresk\MomoApi\Models\Transaction;
 
-// Créer un objet transaction depuis le tableau GET
+// Parse callback data
 $transaction = Transaction::parse($_GET);
 
-echo $transaction->getStatus(); // Pour obtenir le statut de la transaction
-echo $transaction->getAmount(); // Pour récuperer le montant de la transaction
+if ($transaction->isSuccessful()) {
+    // Update your database
+    $orderId = $transaction->getExternalId();
+    $amount = $transaction->getAmount();
+
+    // Process order...
+} elseif ($transaction->isFailed()) {
+    $reason = $transaction->getReason();
+    echo "Failed: {$reason->getCode()} - {$reason->getMessage()}";
+}
 ```
 
-## Documentation supplémentaire
+### Error Handling
 
-Pour plus d'informations sur l'utilisation de la librairie **lepresk/momo-api** et les fonctionnalités disponibles,
-veuillez consulter la documentation officielle dans le dossier "docs" du dépôt GitHub.
+```php
+use Lepresk\MomoApi\Exceptions\ResourceNotFoundException;
+use Lepresk\MomoApi\Exceptions\InternalServerErrorException;
+use Lepresk\MomoApi\Models\ErrorReason;
 
-## Contribution
+try {
+    $paymentId = $collection->quickPay('1000', '242068511358', 'ORDER-999');
+} catch (ResourceNotFoundException $e) {
+    // Payment not found
+    echo "Error: " . $e->getMessage();
+} catch (InternalServerErrorException $e) {
+    // Server error
+    echo "Server error, please retry";
+}
 
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer la librairie, signalez des problèmes ou soumettez
-des demandes de fonctionnalités, veuillez créer une issue sur le dépôt GitHub de la
-librairie : [lepresk/momo-api](https://github.com/lepresk/momo-api).
+// Check error reason from transaction
+$transaction = $collection->getPaymentStatus($paymentId);
+if ($transaction->isFailed()) {
+    $reason = $transaction->getReason();
 
-## Licence
+    if ($reason->isNotEnoughFunds()) {
+        echo "Insufficient funds";
+    } elseif ($reason->isPayerLimitReached()) {
+        echo "Transaction limit exceeded";
+    }
+}
+```
 
-Cette librairie est distribuée sous la licence [MIT](https://opensource.org/licenses/MIT). Vous êtes libre de l'utiliser
-et de la modifier selon vos besoins.
+## Available Environments
+
+| Constant | Value | Use Case |
+|----------|-------|----------|
+| `ENVIRONMENT_SANDBOX` | sandbox | Testing |
+| `ENVIRONMENT_MTN_CONGO` | mtncongo | Production - Congo |
+| `ENVIRONMENT_MTN_UGANDA` | mtnuganda | Production - Uganda |
+| `ENVIRONMENT_MTN_GHANA` | mtnghana | Production - Ghana |
+| `ENVIRONMENT_IVORY_COAST` | mtnivorycoast | Production - Ivory Coast |
+| `ENVIRONMENT_ZAMBIA` | mtnzambia | Production - Zambia |
+| `ENVIRONMENT_CAMEROON` | mtncameroon | Production - Cameroon |
+| `ENVIRONMENT_BENIN` | mtnbenin | Production - Benin |
+| `ENVIRONMENT_SWAZILAND` | mtnswaziland | Production - Swaziland |
+| `ENVIRONMENT_GUINEACONAKRY` | mtnguineaconakry | Production - Guinea Conakry |
+| `ENVIRONMENT_SOUTHAFRICA` | mtnsouthafrica | Production - South Africa |
+| `ENVIRONMENT_LIBERIA` | mtnliberia | Production - Liberia |
+
+## API Reference
+
+### Collection API
+
+| Method | Description |
+|--------|-------------|
+| `requestToPay(PaymentRequest $request)` | Request payment from customer |
+| `quickPay(string $amount, string $phone, string $ref)` | Quick payment helper |
+| `getPaymentStatus(string $paymentId)` | Check payment status |
+| `getBalance()` | Get account balance |
+| `getAccessToken()` | Get OAuth token (auto-managed) |
+
+### Disbursement API
+
+| Method | Description |
+|--------|-------------|
+| `transfer(TransferRequest $request)` | Transfer money to beneficiary |
+| `getTransferStatus(string $transferId)` | Check transfer status |
+| `deposit(PaymentRequest $request)` | Deposit funds |
+| `getDepositStatus(string $depositId)` | Check deposit status |
+| `refund(RefundRequest $request)` | Refund a transaction |
+| `getRefundStatus(string $refundId)` | Check refund status |
+| `getBalance()` | Get account balance |
+| `getAccessToken()` | Get OAuth token (auto-managed) |
+
+### Sandbox API
+
+| Method | Description |
+|--------|-------------|
+| `createApiUser(string $uuid, string $callback)` | Create sandbox API user |
+| `getApiUser(string $uuid)` | Get API user details |
+| `createApiKey(string $uuid)` | Generate API key |
+
+## Testing
+
+```bash
+composer test
+```
+
+## Production Notes
+
+- **Never hardcode credentials** - Use environment variables
+- **Validate callbacks** - Check transaction status via API, not just callback data
+- **Handle webhooks asynchronously** - Process in background queue
+- **Log all transactions** - Keep audit trail
+- **Test thoroughly in sandbox** before going live
+
+## Contributing
+
+Contributions are welcome! Please create an issue or pull request on [GitHub](https://github.com/lepresk/momo-api).
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Support
+
+- Documentation: [MTN MoMo Developer Portal](https://momodeveloper.mtn.com/)
+- Issues: [GitHub Issues](https://github.com/lepresk/momo-api/issues)

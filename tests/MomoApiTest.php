@@ -19,11 +19,12 @@ class MomoApiTest extends TestCase
         $this->assertEquals(MomoApi::PRODUCTION_URL, $baseUrl);
     }
 
-    public function testFailGetCollectionWithoutConfig()
+    public function testFailGetCollectionWithoutRequiredConfig()
     {
         $this->expectException(InvalidArgumentException::class);
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->collection();
+        MomoApi::collection([
+            'environment' => 'sandbox',
+        ]);
     }
 
     public function testFailUseSandboxInProduction()

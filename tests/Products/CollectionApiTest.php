@@ -25,9 +25,14 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection($subscriptionKey, "apiUser", "apiKey", "aCalllback"));
-        $momo->collection()->getAccessToken();
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => $subscriptionKey,
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
+        $collection->getAccessToken();
     }
 
     public function testGetAccessToken()
@@ -48,9 +53,14 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
-        $token = $momo->collection()->getAccessToken();
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
+        $token = $collection->getAccessToken();
 
         $this->assertEquals($sampleToken['access_token'], $token->getAccessToken());
     }
@@ -68,9 +78,14 @@ class CollectionApiTest extends TestCase
 
         $this->expectException(MomoException::class);
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
-        $momo->collection()->getAccessToken();
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
+        $collection->getAccessToken();
     }
 
     public function testRequestToPay()
@@ -86,12 +101,17 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
 
-        $paymentId = $momo->collection()->requestToPay($request);
+        $paymentId = $collection->requestToPay($request);
 
         $this->assertValidGuidV4($paymentId);
     }
@@ -118,13 +138,18 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
 
         $request = new PaymentRequest(1000, 'EUR', 'ORDER-10', '46733123454', '', '');
 
         $this->expectException(MomoException::class);
-        $momo->collection()->requestToPay($request);
+        $collection->requestToPay($request);
     }
 
     public function testCheckTransactionStats()
@@ -154,12 +179,45 @@ class CollectionApiTest extends TestCase
         ];
 
         MomoApi::useClient($this->provideClient($expectedRequests));
-        $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
-        $momo->setupCollection(Config::collection('testSubKey', "apiUser", "apiKey", "aCalllback"));
-        $transaction = $momo->collection()->checkRequestStatus($paymentId);
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+            'callback_url' => 'aCalllback'
+        ]);
+        $transaction = $collection->getPaymentStatus($paymentId);
 
         $this->assertEquals($data['status'], $transaction->getStatus());
         $this->assertEquals($data['payer']['partyId'], $transaction->getPayer());
         $this->assertTrue($transaction->isSuccessful());
+    }
+
+    public function testQuickPay()
+    {
+        $expectedRequests = [
+            $this->provideTokenResponse(),
+            function ($method, $url, $options): MockResponse {
+                $this->assertSame('POST', $method);
+                $this->assertSame($this->baseUrl() . '/collection/v1_0/requesttopay', $url);
+                $body = json_decode($options['body'], true);
+                $this->assertEquals('1000', $body['amount']);
+                $this->assertEquals('242068511358', $body['payer']['partyId']);
+                $this->assertEquals('ORDER-123', $body['externalId']);
+                return new MockResponse('{}', ['http_code' => 202]);
+            },
+        ];
+
+        MomoApi::useClient($this->provideClient($expectedRequests));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+        ]);
+
+        $paymentId = $collection->quickPay('1000', '242068511358', 'ORDER-123');
+
+        $this->assertValidGuidV4($paymentId);
     }
 }

@@ -5,7 +5,7 @@ namespace Tests\Products;
 use Lepresk\MomoApi\Exceptions\BadRequestExeption;
 use Lepresk\MomoApi\Exceptions\ConflictException;
 use Lepresk\MomoApi\Exceptions\MomoException;
-use Lepresk\MomoApi\Exceptions\RessourceNotFoundException;
+use Lepresk\MomoApi\Exceptions\ResourceNotFoundException;
 use Lepresk\MomoApi\MomoApi;
 use Lepresk\MomoApi\Utilities;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -115,7 +115,7 @@ class SandboxApiTest extends TestCase
 
     public function test404IfApiUserNotFound()
     {
-        $this->expectException(RessourceNotFoundException::class);
+        $this->expectException(ResourceNotFoundException::class);
 
         $user = [
             'providerCallbackHost' => 'https://my-domain.com/callback',

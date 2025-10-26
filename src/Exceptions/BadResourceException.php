@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Exceptions;
 
-class BadRessourceExeption extends MomoException
+class BadResourceException extends MomoException
 {
 
     public function __construct()

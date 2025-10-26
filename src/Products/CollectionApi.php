@@ -53,16 +53,23 @@ class CollectionApi extends ApiProduct
 
         $token = $this->getAccessToken();
 
+        $headers = [
+            'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+            'X-Reference-Id' => $xReferenceId,
+            'X-Target-Environment' => $this->environment,
+            'Authorization' => 'Bearer ' . $token->getAccessToken(),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ];
+
+        // Add X-Callback-Url if configured
+        if (!empty($this->config->getCallbackUri())) {
+            $headers['X-Callback-Url'] = $this->config->getCallbackUri();
+        }
+
         $response = $this->client->request('POST', '/collection/v1_0/requesttopay', [
             'json' => $paymentRequest->toArray(),
-            'headers' => [
-                'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
-                'X-Reference-Id' => $xReferenceId,
-                'X-Target-Environment' => $this->environment,
-                'Authorization' => 'Bearer ' . $token->getAccessToken(),
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ]
+            'headers' => $headers
         ]);
 
         $responseCode = $response->getStatusCode();
@@ -123,7 +130,7 @@ class CollectionApi extends ApiProduct
      *          $result->getAmount(); // 1500
      *          $result->getPayer(); // 46733123454
      *      }
-     * } catch (BadRessourceExeption|InternalServerErrorException|RessourceNotFoundException $e) {
+     * } catch (BadResourceException|InternalServerErrorException|ResourceNotFoundException $e) {
      *      // Request failed, do something else
      * }
      * ```
@@ -137,7 +144,7 @@ class CollectionApi extends ApiProduct
      * @throws TransportExceptionInterface
      * @throws MomoException
      */
-    public function checkRequestStatus(string $paymentId): Transaction
+    public function getPaymentStatus(string $paymentId): Transaction
     {
         $token = $this->getAccessToken();
         $response = $this->client->request('GET', '/collection/v1_0/requesttopay/' . $paymentId, [
@@ -148,7 +155,8 @@ class CollectionApi extends ApiProduct
             ]
         ]);
 
-        if ($response->getStatusCode() === 200) {
+        $statusCode = $response->getStatusCode();
+        if ($statusCode === 200 || $statusCode === 202) {
             return Transaction::parse($response->toArray());
         }
 
@@ -166,7 +174,7 @@ class CollectionApi extends ApiProduct
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getAccountBalance(): AccountBalance
+    public function getBalance(): AccountBalance
     {
         $token = $this->getAccessToken();
         $response = $this->client->request('GET', '/collection/v1_0/account/balance', [
@@ -182,5 +190,38 @@ class CollectionApi extends ApiProduct
         }
 
         throw ExceptionFactory::create($response);
+    }
+
+    /**
+     * Quick payment helper with sensible defaults
+     *
+     * @param string $amount
+     * @param string $phone
+     * @param string $reference
+     * @param string $currency
+     * @return string payment ID
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws MomoException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function quickPay(
+        string $amount,
+        string $phone,
+        string $reference,
+        string $currency = 'XAF'
+    ): string {
+        $request = new PaymentRequest(
+            $amount,
+            $currency,
+            $reference,
+            $phone,
+            '',
+            ''
+        );
+
+        return $this->requestToPay($request);
     }
 }

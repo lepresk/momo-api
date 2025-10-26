@@ -18,7 +18,7 @@ class Transaction
     private ?string $payeeNote;
     private string $status;
 
-    private ?string $reason;
+    private ?ErrorReason $reason;
 
     /**
      * @param string|null $financialTransactionId
@@ -29,9 +29,9 @@ class Transaction
      * @param string|null $payerMessage
      * @param string|null $payeeNote
      * @param string $status
-     * @param string|null $reason
+     * @param ErrorReason|null $reason
      */
-    public function __construct(?string $financialTransactionId, ?string $externalId, ?string $amount, string $currency, array $payer, ?string $payerMessage, ?string $payeeNote, string $status, ?string $reason)
+    public function __construct(?string $financialTransactionId, ?string $externalId, ?string $amount, string $currency, array $payer, ?string $payerMessage, ?string $payeeNote, string $status, ?ErrorReason $reason)
     {
         $this->financialTransactionId = $financialTransactionId;
         $this->externalId = $externalId;
@@ -53,16 +53,21 @@ class Transaction
      */
     public static function parse(array $array): Transaction
     {
+        $reason = null;
+        if (isset($array['reason']) && is_array($array['reason'])) {
+            $reason = ErrorReason::fromArray($array['reason']);
+        }
+
         return new self(
             $array['financialTransactionId'] ?? null,
             $array['externalId'],
             $array['amount'],
             $array['currency'],
-            $array['payer'],
+            $array['payer'] ?? $array['payee'] ?? [],
             $array['payerMessage'],
             $array['payeeNote'],
             $array['status'],
-            $array['reason'] ?? null,
+            $reason,
         );
     }
 
@@ -100,9 +105,9 @@ class Transaction
     }
 
     /**
-     * @return string|null
+     * @return ErrorReason|null
      */
-    public function getReason(): ?string
+    public function getReason(): ?ErrorReason
     {
         return $this->reason;
     }
@@ -145,6 +150,15 @@ class Transaction
     public function getPayer(): ?string
     {
         return $this->payer['partyId'] ?? null;
+    }
+
+    /**
+     * Get payee (beneficiary) phone number
+     * @return string|null
+     */
+    public function getPayee(): ?string
+    {
+        return $this->getPayer();
     }
 
     /**

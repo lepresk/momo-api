@@ -33,10 +33,6 @@ class MomoApi
 
     private static ?HttpClientInterface $client = null;
 
-    private ?Config $collectionConfig = null;
-
-    private ?Config $disbursementConfig = null;
-
     private function __construct(string $environment)
     {
         $this->environment = $environment;
@@ -67,12 +63,60 @@ class MomoApi
      */
     public static function create(string $environment): MomoApi
     {
-        if (static::$client === null) {
-            static::$client = HttpClient::create([
-                'base_uri' => static::getBaseUrl($environment),
+        if (self::$client === null) {
+            self::$client = HttpClient::create([
+                'base_uri' => self::getBaseUrl($environment),
             ]);
         }
         return new self($environment);
+    }
+
+    /**
+     * Fluent factory for Collection API
+     *
+     * @param array $config Configuration array with keys: environment, subscription_key, api_user, api_key, callback_url
+     * @return CollectionApi
+     */
+    public static function collection(array $config): CollectionApi
+    {
+        $environment = $config['environment'] ?? self::ENVIRONMENT_SANDBOX;
+        $subscriptionKey = $config['subscription_key'] ?? throw new InvalidArgumentException('subscription_key is required');
+        $apiUser = $config['api_user'] ?? throw new InvalidArgumentException('api_user is required');
+        $apiKey = $config['api_key'] ?? throw new InvalidArgumentException('api_key is required');
+        $callbackUrl = $config['callback_url'] ?? '';
+
+        if (self::$client === null) {
+            self::$client = HttpClient::create([
+                'base_uri' => self::getBaseUrl($environment),
+            ]);
+        }
+
+        $configObject = Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
+        return new CollectionApi(self::$client, $environment, $configObject);
+    }
+
+    /**
+     * Fluent factory for Disbursement API
+     *
+     * @param array $config Configuration array with keys: environment, subscription_key, api_user, api_key, callback_url
+     * @return DisbursementApi
+     */
+    public static function disbursement(array $config): DisbursementApi
+    {
+        $environment = $config['environment'] ?? self::ENVIRONMENT_SANDBOX;
+        $subscriptionKey = $config['subscription_key'] ?? throw new InvalidArgumentException('subscription_key is required');
+        $apiUser = $config['api_user'] ?? throw new InvalidArgumentException('api_user is required');
+        $apiKey = $config['api_key'] ?? throw new InvalidArgumentException('api_key is required');
+        $callbackUrl = $config['callback_url'] ?? '';
+
+        if (self::$client === null) {
+            self::$client = HttpClient::create([
+                'base_uri' => self::getBaseUrl($environment),
+            ]);
+        }
+
+        $configObject = Config::disbursement($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
+        return new DisbursementApi(self::$client, $environment, $configObject);
     }
 
     public static function getBaseUrl($environment): string
@@ -81,44 +125,6 @@ class MomoApi
             return self::SANDBOX_URL;
         }
         return self::PRODUCTION_URL;
-    }
-
-    public function setupCollection(Config $config): void
-    {
-        $this->collectionConfig = $config;
-    }
-
-    public function setupDisbursement(Config $config): void
-    {
-        $this->disbursementConfig = $config;
-    }
-
-    /**
-     * Momo API Collection factory
-     *
-     * @return CollectionApi
-     */
-    public function collection(): CollectionApi
-    {
-        if ($this->collectionConfig === null) {
-            throw new InvalidArgumentException("Collection must be setup with `MomoApi::setupCollection` before call `MomoApi::collection`");
-        }
-
-        return new CollectionApi(static::$client, $this->environment, $this->collectionConfig);
-    }
-
-    /**
-     * Access to Disbursements product
-     *
-     * @return DisbursementApi
-     */
-    public function disbursement(): DisbursementApi
-    {
-        if ($this->disbursementConfig === null) {
-            throw new InvalidArgumentException("Disbursement must be setup with `MomoApi::setupDisbursement` before call `MomoApi::disbursement`");
-        }
-
-        return new DisbursementApi(static::$client, $this->environment, $this->disbursementConfig);
     }
 
     /**
@@ -133,6 +139,6 @@ class MomoApi
             throw new InvalidArgumentException("Environment must be " . self::ENVIRONMENT_SANDBOX);
         }
 
-        return new SandboxApi(static::$client, $this->environment, Config::sandbox($subscriptionKey));
+        return new SandboxApi(self::$client, $this->environment, Config::sandbox($subscriptionKey));
     }
 }

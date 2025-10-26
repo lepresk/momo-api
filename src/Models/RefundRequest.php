@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Models;
 
-class PaymentRequest
+class RefundRequest
 {
     /**
      * @var string
@@ -18,54 +18,53 @@ class PaymentRequest
     /**
      * @var string
      */
-    private $externalId;
-
-    /**
-     * Payer MSISDN (phone number in international format with country code and wihhout '+')
-     *  e.g.`242068511358` Where `242` is a country code and `068511358` is a phone number
-     * @var string
-     */
-    private $payer;
+    private string $externalId;
 
     /**
      * @var string
      */
-    private $payerMessage;
+    private string $payerMessage;
 
     /**
      * @var string
      */
-    private $payerNote;
+    private string $payeeNote;
+
+    /**
+     * UUID of the original transaction to refund
+     * @var string
+     */
+    private string $referenceIdToRefund;
 
     /**
      * @param string $amount
      * @param string $currency
      * @param string $externalId
-     * @param string $payer
+     * @param string $referenceIdToRefund
      * @param string $payerMessage
-     * @param string $payerNote
+     * @param string $payeeNote
      */
     public function __construct(
         string $amount,
         string $currency,
         string $externalId,
-        string $payer,
+        string $referenceIdToRefund,
         string $payerMessage = '',
-        string $payerNote = ''
+        string $payeeNote = ''
     ) {
         $this->amount = $amount;
         $this->currency = $currency;
         $this->externalId = $externalId;
-        $this->payer = $payer;
+        $this->referenceIdToRefund = $referenceIdToRefund;
         $this->payerMessage = $payerMessage;
-        $this->payerNote = $payerNote;
+        $this->payeeNote = $payeeNote;
     }
 
     /**
      * Static factory with sensible defaults
      *
      * @param string $amount
-     * @param string $payer
+     * @param string $referenceIdToRefund
      * @param string $externalId
      * @param string $currency
      * @param string $payerMessage
@@ -74,13 +73,13 @@ class PaymentRequest
      */
     public static function make(
         string $amount,
-        string $payer,
+        string $referenceIdToRefund,
         string $externalId,
         string $currency = 'XAF',
         string $payerMessage = '',
         string $payeeNote = ''
     ): self {
-        return new self($amount, $currency, $externalId, $payer, $payerMessage, $payeeNote);
+        return new self($amount, $currency, $externalId, $referenceIdToRefund, $payerMessage, $payeeNote);
     }
 
     /**
@@ -110,9 +109,9 @@ class PaymentRequest
     /**
      * @return string
      */
-    public function getPayer(): string
+    public function getReferenceIdToRefund(): string
     {
-        return $this->payer;
+        return $this->referenceIdToRefund;
     }
 
     /**
@@ -123,13 +122,12 @@ class PaymentRequest
         return $this->payerMessage;
     }
 
-
     /**
      * @return string
      */
-    public function getPayerNote(): string
+    public function getPayeeNote(): string
     {
-        return $this->payerNote;
+        return $this->payeeNote;
     }
 
     public function toArray(): array
@@ -138,12 +136,9 @@ class PaymentRequest
             "amount" => $this->amount,
             "currency" => $this->currency,
             "externalId" => $this->externalId,
-            "payer" => [
-                "partyIdType" => "MSISDN",
-                "partyId" => $this->payer,
-            ],
             "payerMessage" => $this->payerMessage,
-            "payeeNote" => $this->payerNote,
+            "payeeNote" => $this->payeeNote,
+            "referenceIdToRefund" => $this->referenceIdToRefund,
         ];
     }
 }
