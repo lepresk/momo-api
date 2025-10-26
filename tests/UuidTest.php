@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 
-class UtilitiesTest extends TestCase
+class UuidTest extends TestCase
 {
     public function testValidGuidv4()
     {
-        $guidv4 = Utilities::guidv4();
+        $guidv4 = Uuid::v4();
         $this->assertValidGuidV4($guidv4);
     }
 }

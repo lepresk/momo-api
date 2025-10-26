@@ -7,7 +7,7 @@ use Lepresk\MomoApi\Exceptions\ConflictException;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Exceptions\ResourceNotFoundException;
 use Lepresk\MomoApi\MomoApi;
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Tests\TestCase;
 
@@ -33,7 +33,7 @@ class SandboxApiTest extends TestCase
     public function testCreateApiUser()
     {
         $callbackHost = 'https://my-domain.com/callback';
-        $uuid = Utilities::guidv4();
+        $uuid = Uuid::v4();
 
         $expectedRequests = [
             function ($method, $url, $options) use ($callbackHost, $uuid): MockResponse {
@@ -57,7 +57,7 @@ class SandboxApiTest extends TestCase
     public function testThrowConflictIfApiUserExists()
     {
         $callbackHost = 'https://my-domain.com/callback';
-        $uuid = Utilities::guidv4();
+        $uuid = Uuid::v4();
 
         $expectedRequests = [
             function () use ($callbackHost, $uuid): MockResponse {
@@ -95,7 +95,7 @@ class SandboxApiTest extends TestCase
             'providerCallbackHost' => 'https://my-domain.com/callback',
             'targetEnvironment' => 'sandbox',
         ];
-        $uuid = Utilities::guidv4();
+        $uuid = Uuid::v4();
 
         $expectedRequests = [
             function ($method, $url) use ($user, $uuid): MockResponse {
@@ -121,7 +121,7 @@ class SandboxApiTest extends TestCase
             'providerCallbackHost' => 'https://my-domain.com/callback',
             'targetEnvironment' => 'sandbox',
         ];
-        $uuid = Utilities::guidv4();
+        $uuid = Uuid::v4();
 
         $expectedRequests = [
             function () use ($user, $uuid): MockResponse {
@@ -136,7 +136,7 @@ class SandboxApiTest extends TestCase
 
     public function testCreateApiKey()
     {
-        $apiUser = Utilities::guidv4();
+        $apiUser = Uuid::v4();
 
         $expectedRequests = [
             function ($method, $url) use ($apiUser): MockResponse {
@@ -155,7 +155,7 @@ class SandboxApiTest extends TestCase
 
     public function testThrowIfUnableToCreateApiKey()
     {
-        $apiUser = Utilities::guidv4();
+        $apiUser = Uuid::v4();
 
         $expectedRequests = [
             function () use ($apiUser): MockResponse {

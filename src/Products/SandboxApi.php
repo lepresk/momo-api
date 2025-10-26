@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Products;
 
-use Lepresk\MomoApi\ApiProduct;
+use Lepresk\MomoApi\Abstracts\AbstractApiProduct;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -12,7 +12,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class SandboxApi extends ApiProduct
+class SandboxApi extends AbstractApiProduct
 {
 
     /**

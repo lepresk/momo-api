@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Products;
 
-use Lepresk\MomoApi\Config;
 use Lepresk\MomoApi\Exceptions\MomoException;
+use Lepresk\MomoApi\Models\Config;
 use Lepresk\MomoApi\Models\PaymentRequest;
 use Lepresk\MomoApi\MomoApi;
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Tests\TestCase;
 
@@ -154,7 +154,7 @@ class CollectionApiTest extends TestCase
 
     public function testCheckTransactionStats()
     {
-        $paymentId = Utilities::guidv4();
+        $paymentId = Uuid::v4();
         $data = [
             "financialTransactionId" => "476321816",
             "externalId" => "ORDER-10",

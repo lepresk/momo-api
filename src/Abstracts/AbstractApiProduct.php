@@ -1,20 +1,17 @@
 <?php
+declare(strict_types=1);
 
-namespace Lepresk\MomoApi;
+namespace Lepresk\MomoApi\Abstracts;
 
+use Lepresk\MomoApi\Models\Config;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-abstract class ApiProduct
+abstract class AbstractApiProduct
 {
     protected HttpClientInterface $client;
     protected string $environment;
     protected Config $config;
 
-    /**
-     * @param HttpClientInterface $client
-     * @param string $environment
-     * @param Config $config
-     */
     public function __construct(HttpClientInterface $client, string $environment, Config $config)
     {
         $this->client = $client;

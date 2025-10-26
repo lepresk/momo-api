@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\FixtureTests;
 
-use Lepresk\MomoApi\ApiToken;
+use Lepresk\MomoApi\Models\ApiToken;
 use Lepresk\MomoApi\Models\AccountBalance;
 use Lepresk\MomoApi\Models\ErrorReason;
 use Lepresk\MomoApi\Models\Transaction;

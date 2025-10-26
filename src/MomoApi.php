@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Lepresk\MomoApi;
 
 use InvalidArgumentException;
+use Lepresk\MomoApi\Models\Config;
 use Lepresk\MomoApi\Products\CollectionApi;
 use Lepresk\MomoApi\Products\DisbursementApi;
 use Lepresk\MomoApi\Products\SandboxApi;

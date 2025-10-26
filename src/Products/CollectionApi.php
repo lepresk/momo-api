@@ -3,22 +3,24 @@ declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Products;
 
-use Lepresk\MomoApi\ApiProduct;
-use Lepresk\MomoApi\ApiToken;
+use Lepresk\MomoApi\Abstracts\AbstractApiProduct;
+use Lepresk\MomoApi\Concerns\InteractsWithHttp;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
+use Lepresk\MomoApi\Models\ApiToken;
 use Lepresk\MomoApi\Models\PaymentRequest;
 use Lepresk\MomoApi\Models\Transaction;
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class CollectionApi extends ApiProduct
+class CollectionApi extends AbstractApiProduct
 {
+    use InteractsWithHttp;
 
     /**
      * Request a payment from a consumer (Payer). The payer will be asked to authorize the payment.
@@ -49,7 +51,7 @@ class CollectionApi extends ApiProduct
      */
     public function requestToPay(PaymentRequest $paymentRequest): string
     {
-        $xReferenceId = Utilities::guidv4();
+        $xReferenceId = Uuid::v4();
 
         $token = $this->getAccessToken();
 

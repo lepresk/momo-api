@@ -2,24 +2,26 @@
 
 namespace Lepresk\MomoApi\Products;
 
-use Lepresk\MomoApi\ApiProduct;
-use Lepresk\MomoApi\ApiToken;
+use Lepresk\MomoApi\Abstracts\AbstractApiProduct;
+use Lepresk\MomoApi\Concerns\InteractsWithHttp;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
+use Lepresk\MomoApi\Models\ApiToken;
 use Lepresk\MomoApi\Models\PaymentRequest;
 use Lepresk\MomoApi\Models\RefundRequest;
 use Lepresk\MomoApi\Models\TransferRequest;
 use Lepresk\MomoApi\Models\Transaction;
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class DisbursementApi extends ApiProduct
+class DisbursementApi extends AbstractApiProduct
 {
+    use InteractsWithHttp;
 
     /**
      * Create an access token which can then be used to authorize and authenticate
@@ -116,7 +118,7 @@ class DisbursementApi extends ApiProduct
     {
         $token = $this->getAccessToken();
 
-        $xReferenceId = Utilities::guidv4();
+        $xReferenceId = Uuid::v4();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
@@ -218,7 +220,7 @@ class DisbursementApi extends ApiProduct
     {
         $token = $this->getAccessToken();
 
-        $xReferenceId = Utilities::guidv4();
+        $xReferenceId = Uuid::v4();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
@@ -319,7 +321,7 @@ class DisbursementApi extends ApiProduct
     {
         $token = $this->getAccessToken();
 
-        $xReferenceId = Utilities::guidv4();
+        $xReferenceId = Uuid::v4();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),

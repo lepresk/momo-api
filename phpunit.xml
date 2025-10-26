@@ -8,7 +8,7 @@
         <testsuite name="Unit">
             <directory>./tests/Unit</directory>
             <file>./tests/MomoApiTest.php</file>
-            <file>./tests/UtilitiesTest.php</file>
+            <file>./tests/UuidTest.php</file>
         </testsuite>
         <testsuite name="Fixtures">
             <directory>./tests/FixtureTests</directory>
