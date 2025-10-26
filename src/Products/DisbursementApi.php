@@ -62,6 +62,14 @@ class DisbursementApi extends AbstractApiProduct
     /**
      * Get the balance of own account.
      *
+     * ### Sample usage
+     *
+     * ```
+     * $balance = $disbursement->getBalance();
+     * echo $balance->getAvailableBalance(); // 1000000
+     * echo $balance->getCurrency(); // XAF
+     * ```
+     *
      * @return AccountBalance
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface

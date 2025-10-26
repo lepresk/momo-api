@@ -168,6 +168,14 @@ class CollectionApi extends AbstractApiProduct
     /**
      * Get the balance of own account.
      *
+     * ### Sample usage
+     *
+     * ```
+     * $balance = $collection->getBalance();
+     * echo $balance->getAvailableBalance(); // 50000
+     * echo $balance->getCurrency(); // EUR
+     * ```
+     *
      * @return AccountBalance
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -196,6 +204,15 @@ class CollectionApi extends AbstractApiProduct
 
     /**
      * Quick payment helper with sensible defaults
+     *
+     * ### Sample usage
+     *
+     * ```
+     * $paymentId = $collection->quickPay('1000', '242068511358', 'ORDER-123');
+     * // Equivalent to:
+     * // $request = new PaymentRequest('1000', 'XAF', 'ORDER-123', '242068511358', '', '');
+     * // $collection->requestToPay($request);
+     * ```
      *
      * @param string $amount
      * @param string $phone
