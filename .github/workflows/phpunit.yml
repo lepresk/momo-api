@@ -1,33 +1,42 @@
-name: Tests
+name: CI
 
 on:
   push:
     branches:
       - main
+      - master
   pull_request:
     branches:
       - main
+      - master
 
 jobs:
-  run_tests:
-    name: Run Tests & Static Analysis
+  test:
+    name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["7.4", "8.1", "8.2", "8.3"]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Set up PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: ${{ matrix.php-version }}
           extensions: curl, dom, mbstring, zip, json
+          coverage: none
 
       - name: Install dependencies
-        run: composer install --no-progress
+        run: composer install --no-progress --prefer-dist
 
       - name: Run PHPStan
         run: composer phpstan
+        if: matrix.php-version == '8.3'
 
       - name: Run PHPUnit
         run: ./vendor/bin/phpunit --configuration phpunit.xml

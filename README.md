@@ -1,6 +1,7 @@
 # Librairie Momo API
 
 [![Static Badge](https://img.shields.io/badge/Stable-v1.1.0-blue)](https://packagist.org/packages/lepresk/momo-api)
+[![CI](https://github.com/lepresk/momo-api/actions/workflows/phpunit.yml/badge.svg)](https://github.com/lepresk/momo-api/actions/workflows/phpunit.yml)
 ![GitHub](https://img.shields.io/github/license/lepresk/momo-api)
 
 A powerful and professional PHP wrapper for integrating MTN Mobile Money API. Supports **Collection** (receive payments) and **Disbursement** (send money) operations.
@@ -288,13 +289,27 @@ composer phpstan
 - **Log all transactions** - Keep audit trail
 - **Test thoroughly in sandbox** before going live
 
+## Ecosystem
+
+The same client is available for multiple languages:
+
+| Language | Package | Install |
+|----------|---------|---------|
+| **PHP** | [`lepresk/momo-api`](https://github.com/lepresk/momo-api) | `composer require lepresk/momo-api` |
+| **Node.js / TypeScript** | [`@lepresk/momo-api`](https://github.com/lepresk/momo-api-node) | `npm install @lepresk/momo-api` |
+| **Python** | [`mtn-momo-client`](https://github.com/lepresk/momo-api-python) | `pip install mtn-momo-client` |
+
 ## Contributing
 
-Contributions are welcome! Please create an issue or pull request on [GitHub](https://github.com/lepresk/momo-api).
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full history of changes.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENCE) file for details.
 
 ## Support
 
