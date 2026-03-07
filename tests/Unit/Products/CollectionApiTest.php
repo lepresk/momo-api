@@ -116,6 +116,92 @@ class CollectionApiTest extends TestCase
         $this->assertValidGuidV4($paymentId);
     }
 
+    public function testCheckAccountHolderActive()
+    {
+        $phone = '46733123454';
+        $expectedRequests = [
+            $this->provideTokenResponse(),
+            function ($method, $url, $options) use ($phone): MockResponse {
+                $this->assertSame('GET', $method);
+                $this->assertSame(
+                    $this->baseUrl() . "/collection/v1_0/accountholder/msisdn/$phone/active",
+                    $url
+                );
+                $this->assertArrayHasKey('authorization', $options['normalized_headers']);
+                return new MockResponse(json_encode(['result' => true]), ['http_code' => 200]);
+            },
+        ];
+
+        MomoApi::useClient($this->provideClient($expectedRequests));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+        ]);
+
+        $result = $collection->checkAccountHolder($phone);
+        $this->assertTrue($result);
+    }
+
+    public function testCheckAccountHolderInactive()
+    {
+        $phone = '46733123454';
+        $expectedRequests = [
+            $this->provideTokenResponse(),
+            function (): MockResponse {
+                return new MockResponse(json_encode(['result' => false]), ['http_code' => 200]);
+            },
+        ];
+
+        MomoApi::useClient($this->provideClient($expectedRequests));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+        ]);
+
+        $result = $collection->checkAccountHolder($phone);
+        $this->assertFalse($result);
+    }
+
+    public function testTokenIsCached()
+    {
+        $callCount = 0;
+        $expectedRequests = [
+            function ($method, $url) use (&$callCount): MockResponse {
+                $callCount++;
+                $this->assertStringContainsString('/collection/token/', $url);
+                return new MockResponse(json_encode([
+                    'access_token' => 'cachedToken',
+                    'expires_in' => 3600,
+                    'token_type' => 'Bearer',
+                ]), ['http_code' => 200]);
+            },
+            function ($method, $url, $options): MockResponse {
+                return new MockResponse('{}', ['http_code' => 202]);
+            },
+            function ($method, $url, $options): MockResponse {
+                return new MockResponse('{}', ['http_code' => 202]);
+            },
+        ];
+
+        MomoApi::useClient($this->provideClient($expectedRequests));
+        $collection = MomoApi::collection([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+        ]);
+
+        $request = new PaymentRequest(1000, 'EUR', 'ORDER-1', '46733123454', '', '');
+        $collection->requestToPay($request);
+        $collection->requestToPay(new PaymentRequest(500, 'EUR', 'ORDER-2', '46733123454', '', ''));
+
+        $this->assertEquals(1, $callCount, 'Token endpoint should be called only once due to caching');
+    }
+
     private function provideTokenResponse(): \Closure
     {
         return function ($method, $url): MockResponse {
