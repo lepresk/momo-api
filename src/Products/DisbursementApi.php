@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Lepresk\MomoApi\Products;
 
@@ -7,11 +8,14 @@ use Lepresk\MomoApi\Exceptions\ExceptionFactory;
 use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
 use Lepresk\MomoApi\Models\ApiToken;
+use Lepresk\MomoApi\Models\Config;
 use Lepresk\MomoApi\Models\PaymentRequest;
 use Lepresk\MomoApi\Models\RefundRequest;
 use Lepresk\MomoApi\Models\TransferRequest;
 use Lepresk\MomoApi\Models\Transaction;
+use Lepresk\MomoApi\Support\TokenCache;
 use Lepresk\MomoApi\Support\Uuid;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -20,6 +24,14 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class DisbursementApi extends AbstractApiProduct
 {
+    private TokenCache $tokenCache;
+
+    public function __construct(HttpClientInterface $client, string $environment, Config $config)
+    {
+        parent::__construct($client, $environment, $config);
+        $this->tokenCache = new TokenCache();
+    }
+
     /**
      * Create an access token which can then be used to authorize and authenticate
      * towards the other end-points of the API.
@@ -42,6 +54,11 @@ class DisbursementApi extends AbstractApiProduct
      */
     public function getAccessToken(): ApiToken
     {
+        $cached = $this->tokenCache->get();
+        if ($cached !== null) {
+            return new ApiToken($cached, 'Bearer', 0);
+        }
+
         $response = $this->client->request('POST', "/disbursement/token/", [
             'auth_basic' => [$this->config->getApiUser(), $this->config->getApiKey()],
             'headers' => [
@@ -50,7 +67,44 @@ class DisbursementApi extends AbstractApiProduct
         ]);
 
         if ($response->getStatusCode() === 200) {
-            return ApiToken::fromArray($response->toArray(false));
+            $token = ApiToken::fromArray($response->toArray(false));
+            $this->tokenCache->set($token->getAccessToken(), $token->getExpiresIn());
+            return $token;
+        }
+
+        throw ExceptionFactory::create($response);
+    }
+
+    /**
+     * Check if an account holder is active.
+     *
+     * @param string $phone MSISDN of the account holder
+     * @return bool true if the account is active
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws MomoException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function checkAccountHolder(string $phone): bool
+    {
+        $token = $this->getAccessToken();
+        $response = $this->client->request(
+            'GET',
+            '/disbursement/v1_0/accountholder/msisdn/' . rawurlencode($phone) . '/active',
+            [
+                'headers' => [
+                    'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                    'X-Target-Environment' => $this->environment,
+                    'Authorization' => 'Bearer ' . $token->getAccessToken(),
+                ],
+            ]
+        );
+
+        if ($response->getStatusCode() === 200) {
+            $data = $response->toArray(false);
+            return (bool) ($data['result'] ?? false);
         }
 
         throw ExceptionFactory::create($response);

@@ -162,6 +162,34 @@ class DisbursementApiTest extends TestCase
         $this->assertTrue($transaction->isSuccessful());
     }
 
+    public function testCheckAccountHolderActive()
+    {
+        $phone = '242068511358';
+        $expectedRequests = [
+            $this->provideTokenResponse(),
+            function ($method, $url, $options) use ($phone): MockResponse {
+                $this->assertSame('GET', $method);
+                $this->assertSame(
+                    $this->baseUrl() . "/disbursement/v1_0/accountholder/msisdn/$phone/active",
+                    $url
+                );
+                $this->assertArrayHasKey('authorization', $options['normalized_headers']);
+                return new MockResponse(json_encode(['result' => true]), ['http_code' => 200]);
+            },
+        ];
+
+        MomoApi::useClient($this->provideClient($expectedRequests));
+        $disbursement = MomoApi::disbursement([
+            'environment' => 'sandbox',
+            'subscription_key' => 'testSubKey',
+            'api_user' => 'apiUser',
+            'api_key' => 'apiKey',
+        ]);
+
+        $result = $disbursement->checkAccountHolder($phone);
+        $this->assertTrue($result);
+    }
+
     public function testCallbackUrlHeader()
     {
         $callbackUrl = 'https://example.com/webhook';
