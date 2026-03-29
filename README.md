@@ -1,24 +1,25 @@
 # Librairie Momo API
 
-[![Static Badge](https://img.shields.io/badge/Stable-v1.1.0-blue)](https://packagist.org/packages/lepresk/momo-api)
+[![Static Badge](https://img.shields.io/badge/Stable-v1.2.0-blue)](https://packagist.org/packages/lepresk/momo-api)
 [![CI](https://github.com/lepresk/momo-api/actions/workflows/phpunit.yml/badge.svg)](https://github.com/lepresk/momo-api/actions/workflows/phpunit.yml)
 ![GitHub](https://img.shields.io/github/license/lepresk/momo-api)
 
-A powerful and professional PHP wrapper for integrating MTN Mobile Money API. Supports **Collection** (receive payments) and **Disbursement** (send money) operations.
+A powerful and professional PHP wrapper for integrating **MTN Mobile Money** and **Airtel Money** APIs. Supports **Collection** (receive payments) and **Disbursement** (send money) operations.
 
 ## Features
 
-| Product | Supported Operations |
-|---------|---------------------|
-| **Collection** | Request payments from customers, Check payment status, Get account balance |
-| **Disbursement** | Transfer money, Deposit funds, Process refunds, Get account balance |
-| **Sandbox** | Create API users, Generate API keys, Test environment support |
+| Provider | Product | Supported Operations |
+|----------|---------|---------------------|
+| **MTN MoMo** | Collection | Request payments, Check payment status, Check account holder, Get balance |
+| **MTN MoMo** | Disbursement | Transfer money, Deposit funds, Process refunds, Check account holder, Get balance |
+| **MTN MoMo** | Sandbox | Create API users, Generate API keys, Test environment support |
+| **Airtel Money** | Collection | Request payments, Check payment status, Get balance |
+| **Airtel Money** | Disbursement | Transfer money, Check transfer status, Get balance |
 
 ## Requirements
 
-- PHP 7.4 or higher
-- MTN MoMo Developer Account ([Sign up](https://momodeveloper.mtn.com/))
-- Subscription Key (sandbox or production)
+- PHP 8.2 or higher
+- MTN MoMo Developer Account ([Sign up](https://momodeveloper.mtn.com/)) and/or Airtel Money API credentials
 
 ## Installation
 
@@ -159,6 +160,70 @@ $refundId = $disbursement->refund($refund);
 $balance = $disbursement->getBalance();
 ```
 
+## Airtel Money
+
+### Airtel Collection API (Receive Payments)
+
+```php
+<?php
+use Lepresk\MomoApi\AirtelApi;
+use Lepresk\MomoApi\Models\AirtelConfig;
+
+$collection = AirtelApi::collection('staging', AirtelConfig::collection(
+    clientId: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+));
+
+// Request a payment
+$externalId = $collection->requestToPay('5000', '068511358', 'ORDER-001');
+
+// Check payment status
+$transaction = $collection->getPaymentStatus($externalId);
+
+if ($transaction->isSuccessful()) {
+    echo "Payment received! Airtel Money ID: " . $transaction->getAirtelMoneyId();
+} elseif ($transaction->isPending()) {
+    echo "Payment pending...";
+}
+
+// Check balance
+$balance = $collection->getBalance();
+echo "Available: {$balance->getAvailableBalance()} {$balance->getCurrency()}";
+```
+
+### Airtel Disbursement API (Send Money)
+
+```php
+<?php
+use Lepresk\MomoApi\AirtelApi;
+use Lepresk\MomoApi\Models\AirtelConfig;
+
+$disbursement = AirtelApi::disbursement('production', AirtelConfig::disbursement(
+    clientId: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+    encryptedPin: 'YOUR_ENCRYPTED_PIN',
+));
+
+// Transfer money
+$externalId = $disbursement->transfer('10000', '068511358', 'PAY-001');
+
+// Check transfer status
+$transaction = $disbursement->getTransferStatus($externalId);
+
+if ($transaction->isSuccessful()) {
+    echo "Transfer completed!";
+}
+```
+
+### Airtel Environments
+
+| Mode | URL | Use Case |
+|------|-----|----------|
+| `staging` | `https://openapiuat.airtel.cg` | Testing |
+| `production` | `https://openapi.airtel.cg` | Production - Congo |
+
+---
+
 ### Handling Callbacks
 
 ```php
@@ -236,6 +301,7 @@ if ($transaction->isFailed()) {
 | `requestToPay(PaymentRequest $request)` | Request payment from customer |
 | `quickPay(string $amount, string $phone, string $ref)` | Quick payment helper |
 | `getPaymentStatus(string $paymentId)` | Check payment status |
+| `checkAccountHolder(string $phone)` | Check if MSISDN is active |
 | `getBalance()` | Get account balance |
 | `getAccessToken()` | Get OAuth token (auto-managed) |
 
@@ -249,8 +315,27 @@ if ($transaction->isFailed()) {
 | `getDepositStatus(string $depositId)` | Check deposit status |
 | `refund(RefundRequest $request)` | Refund a transaction |
 | `getRefundStatus(string $refundId)` | Check refund status |
+| `checkAccountHolder(string $phone)` | Check if MSISDN is active |
 | `getBalance()` | Get account balance |
 | `getAccessToken()` | Get OAuth token (auto-managed) |
+
+### Airtel Collection API
+
+| Method | Description |
+|--------|-------------|
+| `requestToPay(string $amount, string $phone, string $reference)` | Request payment from customer |
+| `getPaymentStatus(string $externalId)` | Check payment status (returns `AirtelTransaction`) |
+| `getBalance()` | Get account balance |
+| `getAccessToken()` | Get OAuth token (cached automatically) |
+
+### Airtel Disbursement API
+
+| Method | Description |
+|--------|-------------|
+| `transfer(string $amount, string $phone, string $reference)` | Transfer money (requires `encryptedPin`) |
+| `getTransferStatus(string $externalId)` | Check transfer status (returns `AirtelTransaction`) |
+| `getBalance()` | Get account balance |
+| `getAccessToken()` | Get OAuth token (cached automatically) |
 
 ### Sandbox API
 
