@@ -14,6 +14,7 @@ class Transaction
     private ?string $amount;
     private string $currency;
     private array $payer = [];
+    private array $payee = [];
     private ?string $payerMessage;
     private ?string $payeeNote;
     private string $status;
@@ -31,13 +32,14 @@ class Transaction
      * @param string $status
      * @param ErrorReason|null $reason
      */
-    public function __construct(?string $financialTransactionId, ?string $externalId, ?string $amount, string $currency, array $payer, ?string $payerMessage, ?string $payeeNote, string $status, ?ErrorReason $reason)
+    public function __construct(?string $financialTransactionId, ?string $externalId, ?string $amount, string $currency, array $payer, array $payee, ?string $payerMessage, ?string $payeeNote, string $status, ?ErrorReason $reason)
     {
         $this->financialTransactionId = $financialTransactionId;
         $this->externalId = $externalId;
         $this->amount = $amount;
         $this->currency = $currency;
         $this->payer = $payer;
+        $this->payee = $payee;
         $this->payerMessage = $payerMessage;
         $this->payeeNote = $payeeNote;
         $this->status = $status;
@@ -63,7 +65,8 @@ class Transaction
             $array['externalId'],
             $array['amount'],
             $array['currency'],
-            $array['payer'] ?? $array['payee'] ?? [],
+            $array['payer'] ?? [],
+            $array['payee'] ?? [],
             $array['payerMessage'],
             $array['payeeNote'],
             $array['status'],
@@ -158,7 +161,7 @@ class Transaction
      */
     public function getPayee(): ?string
     {
-        return $this->getPayer();
+        return $this->payee['partyId'] ?? null;
     }
 
     /**
