@@ -68,6 +68,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
         return new self($environment);
     }
@@ -90,6 +92,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
 
         $configObject = Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
@@ -114,6 +118,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
 
         $configObject = Config::disbursement($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
