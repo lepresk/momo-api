@@ -400,3 +400,6 @@ MIT License - see [LICENSE](LICENCE) file for details.
 
 - Documentation: [MTN MoMo Developer Portal](https://momodeveloper.mtn.com/)
 - Issues: [GitHub Issues](https://github.com/lepresk/momo-api/issues)
+
+
+<!-- Fix #15 -->
