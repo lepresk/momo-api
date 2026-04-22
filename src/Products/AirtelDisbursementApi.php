@@ -95,7 +95,7 @@ class AirtelDisbursementApi
                 'reference' => $reference,
                 'pin' => $this->config->getEncryptedPin(),
                 'transaction' => [
-                    'amount' => (string) intval($amount),
+                    'amount' => (string) $amount,
                     'id' => $externalId,
                 ],
             ],
