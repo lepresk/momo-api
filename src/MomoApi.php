@@ -68,6 +68,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
         return new self($environment);
     }
@@ -90,6 +92,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
 
         $configObject = Config::collection($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
@@ -114,6 +118,8 @@ class MomoApi
             self::$client = HttpClient::create([
                 'base_uri' => self::getBaseUrl($environment),
             ]);
+        } else {
+            self::$client = self::$client->withOptions(['base_uri' => self::getBaseUrl($environment)]);
         }
 
         $configObject = Config::disbursement($subscriptionKey, $apiUser, $apiKey, $callbackUrl);
@@ -122,8 +128,19 @@ class MomoApi
 
     public static function getBaseUrl($environment): string
     {
-        if ($environment === MomoApi::ENVIRONMENT_SANDBOX) {
+        if ($environment === self::ENVIRONMENT_SANDBOX) {
             return self::SANDBOX_URL;
+        }
+        $known = [
+            self::ENVIRONMENT_MTN_CONGO, self::ENVIRONMENT_MTN_UGANDA,
+            self::ENVIRONMENT_MTN_GHANA, self::ENVIRONMENT_IVORY_COAST,
+            self::ENVIRONMENT_ZAMBIA, self::ENVIRONMENT_CAMEROON,
+            self::ENVIRONMENT_BENIN, self::ENVIRONMENT_SWAZILAND,
+            self::ENVIRONMENT_GUINEACONAKRY, self::ENVIRONMENT_SOUTHAFRICA,
+            self::ENVIRONMENT_LIBERIA,
+        ];
+        if (!in_array($environment, $known, true)) {
+            throw new \InvalidArgumentException("Unknown environment: '$environment'");
         }
         return self::PRODUCTION_URL;
     }
