@@ -215,6 +215,36 @@ if ($transaction->isSuccessful()) {
 }
 ```
 
+### Airtel Disbursement PIN
+
+The transfer endpoint takes an RSA-encrypted PIN, never the PIN itself:
+
+```php
+use Lepresk\MomoApi\Support\AirtelPin;
+
+$disbursement = AirtelApi::disbursement('production', AirtelConfig::disbursement(
+    clientId: getenv('AIRTEL_CLIENT_ID'),
+    clientSecret: getenv('AIRTEL_CLIENT_SECRET'),
+    encryptedPin: AirtelPin::encrypt('1234', getenv('AIRTEL_PUBLIC_KEY')),
+));
+```
+
+The key is accepted base64-encoded or as PEM.
+
+### Airtel Phone Numbers
+
+Airtel expects a national MSISDN. Numbers are normalised for you — passing
+`242068511358` or `068511358` sends `068511358` either way. `Phone::clean()` is
+public if you need the same normalisation elsewhere.
+
+### Airtel Failures
+
+Airtel reports business failures with HTTP 200 and `status.success: false`, so
+`requestToPay()` and `transfer()` throw a `MomoException` in that case rather
+than returning an externalId for a refused request.
+
+Status codes: `TS` successful, `TF` failed, `TIP` and `TI` both pending.
+
 ### Airtel Environments
 
 | Mode | URL | Use Case |

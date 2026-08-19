@@ -16,9 +16,11 @@ class AirtelTransaction
     public const STATUS_SUCCESSFUL = 'TS';
     public const STATUS_FAILED = 'TF';
     public const STATUS_PENDING = 'TIP';
+    public const STATUS_IN_PROGRESS = 'TI';
 
     private string $id;
     private string $status;
+    private ?string $referenceId;
     private ?string $airtelMoneyId;
     private ?string $message;
 
@@ -26,6 +28,7 @@ class AirtelTransaction
     {
         $this->id = (string) ($data['id'] ?? '');
         $this->status = (string) ($data['status'] ?? '');
+        $this->referenceId = isset($data['reference_id']) ? (string) $data['reference_id'] : null;
         $this->airtelMoneyId = isset($data['airtel_money_id']) ? (string) $data['airtel_money_id'] : null;
         $this->message = isset($data['message']) ? (string) $data['message'] : null;
     }
@@ -50,14 +53,26 @@ class AirtelTransaction
         return $this->status === self::STATUS_SUCCESSFUL;
     }
 
+    /**
+     * Airtel uses two codes for a transaction that has not settled yet.
+     */
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === self::STATUS_PENDING
+            || $this->status === self::STATUS_IN_PROGRESS;
     }
 
     public function isFailed(): bool
     {
         return $this->status === self::STATUS_FAILED;
+    }
+
+    /**
+     * Airtel's own reference for the transaction, when it returns one.
+     */
+    public function getReferenceId(): ?string
+    {
+        return $this->referenceId;
     }
 
     public function getAirtelMoneyId(): ?string

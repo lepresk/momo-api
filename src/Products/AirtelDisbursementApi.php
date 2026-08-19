@@ -5,9 +5,12 @@ namespace Lepresk\MomoApi\Products;
 
 use InvalidArgumentException;
 use Lepresk\MomoApi\Exceptions\ExceptionFactory;
+use Lepresk\MomoApi\Exceptions\MomoException;
 use Lepresk\MomoApi\Models\AccountBalance;
 use Lepresk\MomoApi\Models\AirtelConfig;
+use Lepresk\MomoApi\Models\AirtelResponseStatus;
 use Lepresk\MomoApi\Models\AirtelTransaction;
+use Lepresk\MomoApi\Support\Phone;
 use Lepresk\MomoApi\Support\TokenCache;
 use Lepresk\MomoApi\Support\Uuid;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -16,6 +19,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class AirtelDisbursementApi
 {
@@ -91,7 +95,7 @@ class AirtelDisbursementApi
 
         $response = $this->client->request('POST', '/standard/v1/disbursements/', [
             'json' => [
-                'payee' => ['msisdn' => $phone],
+                'payee' => ['msisdn' => Phone::clean($phone)],
                 'reference' => $reference,
                 'pin' => $this->config->getEncryptedPin(),
                 'transaction' => [
@@ -108,9 +112,7 @@ class AirtelDisbursementApi
             ],
         ]);
 
-        if ($response->getStatusCode() >= 400) {
-            throw ExceptionFactory::create($response);
-        }
+        $this->readAirtel($response);
 
         return $externalId;
     }
@@ -178,14 +180,37 @@ class AirtelDisbursementApi
             ],
         ]);
 
-        if ($response->getStatusCode() !== 200) {
-            throw ExceptionFactory::create($response);
-        }
+        $data = $this->readAirtel($response);
 
-        $data = $response->toArray(false);
         return AccountBalance::parse([
             'availableBalance' => (string) ($data['data']['balance'] ?? '0'),
             'currency' => (string) ($data['data']['currency'] ?? ''),
         ]);
+    }
+
+    /**
+     * Read an Airtel payload, raising when its `status` envelope reports a
+     * business failure. Airtel answers those with HTTP 200, so the status code
+     * alone is not enough to tell success from refusal.
+     *
+     * @throws MomoException
+     */
+    private function readAirtel(ResponseInterface $response): array
+    {
+        if ($response->getStatusCode() >= 400) {
+            throw ExceptionFactory::create($response);
+        }
+
+        $body = $response->toArray(false);
+        $status = AirtelResponseStatus::parse($body);
+
+        if ($status !== null && !$status->isSuccessful()) {
+            throw new MomoException(
+                $status->getMessage() ?? 'Airtel rejected the request',
+                (int) ($status->getCode() ?? $response->getStatusCode())
+            );
+        }
+
+        return $body;
     }
 }
