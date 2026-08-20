@@ -83,13 +83,13 @@ $result = $disbursement->getTransferStatus($transferId);
 ```php
 <?php
 use Lepresk\MomoApi\MomoApi;
-use Lepresk\MomoApi\Utilities;
+use Lepresk\MomoApi\Support\Uuid;
 
 $momo = MomoApi::create(MomoApi::ENVIRONMENT_SANDBOX);
 $subscriptionKey = 'YOUR_SANDBOX_SUBSCRIPTION_KEY';
 
 // 1. Create API User
-$uuid = Utilities::guidv4();
+$uuid = Uuid::v4();
 $callbackHost = 'https://yourdomain.com/callback';
 $apiUser = $momo->sandbox($subscriptionKey)->createApiUser($uuid, $callbackHost);
 
