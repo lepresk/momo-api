@@ -99,6 +99,11 @@ $apiKey = $momo->sandbox($subscriptionKey)->createApiKey($apiUser);
 // Now use these credentials for Collection/Disbursement
 ```
 
+The sandbox accepts EUR only. Against the sandbox, `requestToPay()`, `quickPay()`,
+`deposit()`, `transfer()` and `refund()` send `EUR` whatever currency the request
+was built with (`MomoApi::SANDBOX_CURRENCY`), so the same XAF code runs in both
+environments. Outside the sandbox the request currency is sent as is.
+
 ## Advanced Usage
 
 ### Collection API - Full Example
