@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-09-29
+
+MTN Get Status failures, sandbox currency and callback guidance. Anyone reading
+`Transaction::getReason()` on a failed transaction should upgrade: MTN's documented Get Status
+body left it empty.
+
+### Fixed
+- A FAILED transaction from Get Status had no reason. Since January 2024 MTN
+  reports the business failure in an HTTP 200 body with `reason` as a bare
+  string (`"reason": "NOT_ENOUGH_FUNDS"`), but only the `{ code, message }`
+  object was parsed. `Transaction::parse()` now accepts both shapes; a string becomes an
+  `ErrorReason` with that code and an empty message
+- An `ErrorReason` without a message rendered with a trailing space
+  (`"[NOT_ENOUGH_FUNDS] "`); it now renders as `"[NOT_ENOUGH_FUNDS]"`
+- Payments in the sandbox failed with the default currency. The sandbox accepts
+  EUR only, but `quickPay()` and the request `make()` factories default to XAF.
+  Against the sandbox, `requestToPay()`, `quickPay()`, `deposit()`, `transfer()`
+  and `refund()` now send `EUR` whatever the request currency; the request
+  object is left untouched, and other environments are unaffected
+- The README's callback example fulfilled the order straight from the callback
+  data. MTN and Airtel do not sign callbacks, so anyone who knows the callback
+  URL could mark an unpaid order as paid. The example now re-queries the status
+  from MTN or Airtel before fulfilling, for both providers
+
+### Added
+- `ErrorReason` constants and predicates for the Get Status failure codes MTN
+  documents or returns in production: `LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED`,
+  `COULD_NOT_PERFORM_TRANSACTION`, `SENDER_ACCOUNT_NOT_ACTIVE`,
+  `PAYEE_LIMIT_REACHED`, `TRANSACTION_NOT_FOUND`, `VALIDATION_ERROR`
+- `ErrorReason::isPayerFundingFailure()`: true for `NOT_ENOUGH_FUNDS`,
+  `PAYER_LIMIT_REACHED` and `LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED`.
+  MTN Congo returns the last one instead of `NOT_ENOUGH_FUNDS`, so
+  `isNotEnoughFunds()` alone misses an insufficient balance there
+- `MomoApi::SANDBOX_CURRENCY`: `'EUR'`, the only currency the sandbox accepts
+
 ## [1.3.0] - 2026-08-19
 
 Airtel Money corrections. Anyone using the Airtel products should upgrade: the

@@ -90,6 +90,44 @@ class CollectionFixtureTest extends TestCase
         $this->assertFalse($transaction->getReason()->isNotEnoughFunds());
     }
 
+    public function testParsePaymentFailedWithStringReason()
+    {
+        // Get Status reports a business failure as HTTP 200 with a bare string reason
+        $json = file_get_contents(__DIR__ . '/../Fixtures/Collection/payment_failed_string_reason.json');
+        $data = json_decode($json, true);
+
+        $transaction = Transaction::parse($data);
+
+        $this->assertTrue($transaction->isFailed());
+        $this->assertInstanceOf(ErrorReason::class, $transaction->getReason());
+        $this->assertEquals('NOT_ENOUGH_FUNDS', $transaction->getReason()->getCode());
+        $this->assertEquals('', $transaction->getReason()->getMessage());
+        $this->assertTrue($transaction->getReason()->isNotEnoughFunds());
+    }
+
+    public function testParsePaymentFailedCongoLowBalance()
+    {
+        $json = file_get_contents(__DIR__ . '/../Fixtures/Collection/payment_failed_congo_low_balance.json');
+        $data = json_decode($json, true);
+
+        $transaction = Transaction::parse($data);
+
+        $this->assertTrue($transaction->isFailed());
+        $this->assertInstanceOf(ErrorReason::class, $transaction->getReason());
+        $this->assertTrue($transaction->getReason()->isLowBalanceOrPayeeLimitReachedOrNotAllowed());
+        $this->assertTrue($transaction->getReason()->isPayerFundingFailure());
+        $this->assertFalse($transaction->getReason()->isNotEnoughFunds());
+    }
+
+    public function testParsePaymentFailedWithEmptyStringReason()
+    {
+        $json = file_get_contents(__DIR__ . '/../Fixtures/Collection/payment_failed_string_reason.json');
+        $data = json_decode($json, true);
+        $data['reason'] = '';
+
+        $this->assertNull(Transaction::parse($data)->getReason());
+    }
+
     public function testParseBalance()
     {
         $json = file_get_contents(__DIR__ . '/../Fixtures/Collection/balance.json');

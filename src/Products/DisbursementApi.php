@@ -194,7 +194,7 @@ class DisbursementApi extends AbstractApiProduct
         }
 
         $response = $this->client->request('POST', '/disbursement/v1_0/deposit', [
-            'json' => $paymentRequest->toArray(),
+            'json' => $this->requestBody($paymentRequest->toArray()),
             'headers' => $headers
         ]);
 
@@ -296,7 +296,7 @@ class DisbursementApi extends AbstractApiProduct
         }
 
         $response = $this->client->request('POST', '/disbursement/v1_0/transfer', [
-            'json' => $transferRequest->toArray(),
+            'json' => $this->requestBody($transferRequest->toArray()),
             'headers' => $headers
         ]);
 
@@ -397,7 +397,7 @@ class DisbursementApi extends AbstractApiProduct
         }
 
         $response = $this->client->request('POST', '/disbursement/v1_0/refund', [
-            'json' => $refundRequest->toArray(),
+            'json' => $this->requestBody($refundRequest->toArray()),
             'headers' => $headers
         ]);
 

@@ -55,9 +55,13 @@ class Transaction
      */
     public static function parse(array $array): Transaction
     {
+        // HTTP error bodies carry { code, message }; Get Status reports a FAILED
+        // transaction with HTTP 200 and a bare string code instead
         $reason = null;
         if (isset($array['reason']) && is_array($array['reason'])) {
             $reason = ErrorReason::fromArray($array['reason']);
+        } elseif (isset($array['reason']) && is_string($array['reason']) && $array['reason'] !== '') {
+            $reason = new ErrorReason($array['reason'], '');
         }
 
         return new self(

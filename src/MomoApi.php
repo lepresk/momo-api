@@ -26,6 +26,9 @@ class MomoApi
     public const ENVIRONMENT_LIBERIA = 'mtnliberia';
     public const ENVIRONMENT_SANDBOX = 'sandbox';
 
+    /** The only currency the sandbox accepts; payment requests sent there carry it */
+    public const SANDBOX_CURRENCY = 'EUR';
+
 
     public const SANDBOX_URL = 'https://sandbox.momodeveloper.mtn.com';
     public const PRODUCTION_URL = 'https://proxy.momoapi.mtn.com';

@@ -78,7 +78,7 @@ class CollectionApi extends AbstractApiProduct
         }
 
         $response = $this->client->request('POST', '/collection/v1_0/requesttopay', [
-            'json' => $paymentRequest->toArray(),
+            'json' => $this->requestBody($paymentRequest->toArray()),
             'headers' => $headers
         ]);
 

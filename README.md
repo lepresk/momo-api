@@ -99,6 +99,11 @@ $apiKey = $momo->sandbox($subscriptionKey)->createApiKey($apiUser);
 // Now use these credentials for Collection/Disbursement
 ```
 
+The sandbox accepts EUR only. Against the sandbox, `requestToPay()`, `quickPay()`,
+`deposit()`, `transfer()` and `refund()` send `EUR` whatever currency the request
+was built with (`MomoApi::SANDBOX_CURRENCY`), so the same XAF code runs in both
+environments. Outside the sandbox the request currency is sent as is.
+
 ## Advanced Usage
 
 ### Collection API - Full Example
@@ -256,24 +261,73 @@ Status codes: `TS` successful, `TF` failed, `TIP` and `TI` both pending.
 
 ### Handling Callbacks
 
+> **Callbacks are not signed.** Neither MTN nor Airtel signs the request sent to
+> your callback URL, and that URL is no secret: it travels in the `X-Callback-Url`
+> header of every request. Anyone can call it with `"status": "SUCCESSFUL"`.
+> Never fulfil an order from the callback body. Treat the callback as a signal
+> that something changed, then ask MTN or Airtel for the real status.
+
+#### MTN MoMo
+
+MTN sends the callback as a JSON body (`PUT`). Use it only to find the order, then
+re-query the payment with the reference id `requestToPay()` returned, which you
+stored with the order:
+
 ```php
 <?php
-use Lepresk\MomoApi\Models\Transaction;
+$payload = json_decode(file_get_contents('php://input'), true) ?? [];
 
-// Parse callback data
-$transaction = Transaction::parse($_GET);
+// Look the order up in your own records; never trust the amount in the callback
+$order = $orders->findByExternalId($payload['externalId'] ?? '');
+if ($order === null) {
+    http_response_code(404);
+    exit;
+}
+
+// Ask MTN, with the reference id stored when the payment was requested
+$transaction = $collection->getPaymentStatus($order->momoReferenceId);
+
+if ($transaction->isSuccessful()
+    && $transaction->getExternalId() === $order->id
+    && (float) $transaction->getAmount() === (float) $order->amount
+) {
+    $order->markPaid();   // make this idempotent: MTN may call more than once
+} elseif ($transaction->isFailed()) {
+    $order->markFailed((string) $transaction->getReason());
+}
+
+http_response_code(200);
+```
+
+#### Airtel Money
+
+Airtel's callback carries `transaction.id`, the externalId you passed to
+`requestToPay()`. Re-query it the same way:
+
+```php
+<?php
+$payload = json_decode(file_get_contents('php://input'), true) ?? [];
+
+$order = $orders->findByExternalId($payload['transaction']['id'] ?? '');
+if ($order === null) {
+    http_response_code(404);
+    exit;
+}
+
+// Ask Airtel; the callback's status_code is not proof of payment
+$transaction = $airtelCollection->getPaymentStatus($order->id);
 
 if ($transaction->isSuccessful()) {
-    // Update your database
-    $orderId = $transaction->getExternalId();
-    $amount = $transaction->getAmount();
-
-    // Process order...
+    $order->markPaid();
 } elseif ($transaction->isFailed()) {
-    $reason = $transaction->getReason();
-    echo "Failed: {$reason->getCode()} - {$reason->getMessage()}";
+    $order->markFailed((string) $transaction->getMessage());
 }
+
+http_response_code(200);
 ```
+
+`Transaction::parse()` turns an array into a `Transaction`; it does not verify
+anything. Use it on data you fetched yourself, not on a callback you intend to act on.
 
 ### Error Handling
 
@@ -297,10 +351,12 @@ $transaction = $collection->getPaymentStatus($paymentId);
 if ($transaction->isFailed()) {
     $reason = $transaction->getReason();
 
-    if ($reason->isNotEnoughFunds()) {
-        echo "Insufficient funds";
-    } elseif ($reason->isPayerLimitReached()) {
-        echo "Transaction limit exceeded";
+    // isPayerFundingFailure() also covers LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED,
+    // which MTN Congo returns instead of NOT_ENOUGH_FUNDS
+    if ($reason !== null && $reason->isPayerFundingFailure()) {
+        echo "Insufficient funds or limit reached";
+    } elseif ($reason !== null) {
+        echo "Failed: {$reason}";   // "[COULD_NOT_PERFORM_TRANSACTION]"
     }
 }
 ```

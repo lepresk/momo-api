@@ -22,6 +22,13 @@ class ErrorReason
     public const EXPIRED = 'EXPIRED';
     public const TRANSACTION_CANCELED = 'TRANSACTION_CANCELED';
     public const RESOURCE_ALREADY_EXIST = 'RESOURCE_ALREADY_EXIST';
+    public const COULD_NOT_PERFORM_TRANSACTION = 'COULD_NOT_PERFORM_TRANSACTION';
+    public const SENDER_ACCOUNT_NOT_ACTIVE = 'SENDER_ACCOUNT_NOT_ACTIVE';
+    public const PAYEE_LIMIT_REACHED = 'PAYEE_LIMIT_REACHED';
+    public const TRANSACTION_NOT_FOUND = 'TRANSACTION_NOT_FOUND';
+    public const VALIDATION_ERROR = 'VALIDATION_ERROR';
+    /** MTN Congo's Get Status code for a payer with no balance, at a limit, or not allowed to pay */
+    public const LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED = 'LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED';
 
     private string $code;
     private string $message;
@@ -67,8 +74,51 @@ class ErrorReason
         return $this->is(self::PAYER_LIMIT_REACHED);
     }
 
+    public function isLowBalanceOrPayeeLimitReachedOrNotAllowed(): bool
+    {
+        return $this->is(self::LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED);
+    }
+
+    public function isCouldNotPerformTransaction(): bool
+    {
+        return $this->is(self::COULD_NOT_PERFORM_TRANSACTION);
+    }
+
+    public function isSenderAccountNotActive(): bool
+    {
+        return $this->is(self::SENDER_ACCOUNT_NOT_ACTIVE);
+    }
+
+    public function isPayeeLimitReached(): bool
+    {
+        return $this->is(self::PAYEE_LIMIT_REACHED);
+    }
+
+    public function isTransactionNotFound(): bool
+    {
+        return $this->is(self::TRANSACTION_NOT_FOUND);
+    }
+
+    public function isValidationError(): bool
+    {
+        return $this->is(self::VALIDATION_ERROR);
+    }
+
+    /**
+     * The payer could not fund the payment: not enough balance or a limit reached.
+     * MTN Congo reports this as LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED
+     * rather than NOT_ENOUGH_FUNDS, so check this rather than isNotEnoughFunds()
+     * when the market does not matter.
+     */
+    public function isPayerFundingFailure(): bool
+    {
+        return $this->isNotEnoughFunds()
+            || $this->isPayerLimitReached()
+            || $this->isLowBalanceOrPayeeLimitReachedOrNotAllowed();
+    }
+
     public function __toString(): string
     {
-        return "[{$this->code}] {$this->message}";
+        return $this->message === '' ? "[{$this->code}]" : "[{$this->code}] {$this->message}";
     }
 }
