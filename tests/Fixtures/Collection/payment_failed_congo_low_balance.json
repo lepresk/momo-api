@@ -1,0 +1,13 @@
+{
+  "amount": "2500",
+  "currency": "XAF",
+  "externalId": "ORDER-791",
+  "payer": {
+    "partyIdType": "MSISDN",
+    "partyId": "242068511358"
+  },
+  "payerMessage": "Payment attempt",
+  "payeeNote": "",
+  "status": "FAILED",
+  "reason": "LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED"
+}

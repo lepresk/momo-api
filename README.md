@@ -297,10 +297,12 @@ $transaction = $collection->getPaymentStatus($paymentId);
 if ($transaction->isFailed()) {
     $reason = $transaction->getReason();
 
-    if ($reason->isNotEnoughFunds()) {
-        echo "Insufficient funds";
-    } elseif ($reason->isPayerLimitReached()) {
-        echo "Transaction limit exceeded";
+    // isPayerFundingFailure() also covers LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED,
+    // which MTN Congo returns instead of NOT_ENOUGH_FUNDS
+    if ($reason !== null && $reason->isPayerFundingFailure()) {
+        echo "Insufficient funds or limit reached";
+    } elseif ($reason !== null) {
+        echo "Failed: {$reason}";   // "[COULD_NOT_PERFORM_TRANSACTION]"
     }
 }
 ```
