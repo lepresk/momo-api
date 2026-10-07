@@ -64,15 +64,16 @@ class Transaction
             $reason = new ErrorReason($array['reason'], '');
         }
 
+        // MTN leaves out payerMessage and payeeNote on transfers and refunds
         return new self(
             $array['financialTransactionId'] ?? null,
-            $array['externalId'],
-            $array['amount'],
+            $array['externalId'] ?? null,
+            $array['amount'] ?? null,
             $array['currency'],
             $array['payer'] ?? [],
             $array['payee'] ?? [],
-            $array['payerMessage'],
-            $array['payeeNote'],
+            $array['payerMessage'] ?? null,
+            $array['payeeNote'] ?? null,
             $array['status'],
             $reason,
         );
