@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.5.0] - 2026-10-07
+
+Caller-supplied reference ids, and transfer and refund statuses that no longer
+warn. Anyone who retries writes after a timeout or 5xx should upgrade: with a
+random id, a lost response could not be queried and a retry could pay twice.
 
 ### Added
 - Write methods take an optional caller-supplied id: `$referenceId` on MTN
@@ -18,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UUID; anything else throws an `InvalidArgumentException` before a request is
   sent. Omitting it keeps the random UUID, so existing code is unaffected
 - `Uuid::assert()` to check a value is a UUID
+
+### Fixed
+- Reading the status of a transfer or refund raised `Undefined array key`
+  warnings. MTN leaves `payerMessage` and `payeeNote` out of those bodies, and
+  `Transaction::parse()` read them unguarded; under an error handler that turns
+  warnings into exceptions, the status call threw. Missing `externalId`,
+  `amount`, `payerMessage` and `payeeNote` now parse as `null`
 
 ## [1.4.0] - 2026-09-29
 
