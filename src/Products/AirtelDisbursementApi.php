@@ -77,21 +77,29 @@ class AirtelDisbursementApi
     /**
      * Transfer funds to a payee. Returns the externalId for status checks.
      *
-     * @throws InvalidArgumentException if encryptedPin is not configured
+     * @param string|null $transactionId UUID to use as the externalId instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
+     * @throws InvalidArgumentException if encryptedPin is not configured, or $transactionId is not a UUID
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function transfer(string $amount, string $phone, string $reference): string
-    {
+    public function transfer(
+        string $amount,
+        string $phone,
+        string $reference,
+        ?string $transactionId = null
+    ): string {
         if (empty($this->config->getEncryptedPin())) {
             throw new InvalidArgumentException('encryptedPin is required for disbursement transfers');
         }
 
+        $externalId = $transactionId ?? Uuid::v4();
+        Uuid::assert($externalId, 'transactionId');
+
         $token = $this->getAccessToken();
-        $externalId = Uuid::v4();
 
         $response = $this->client->request('POST', '/standard/v1/disbursements/', [
             'json' => [

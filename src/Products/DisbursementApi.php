@@ -165,6 +165,8 @@ class DisbursementApi extends AbstractApiProduct
      * $paymentId = $momo->disbursement()->deposit($request);
      * ```
      * @param PaymentRequest $paymentRequest
+     * @param string|null $referenceId UUID to use as the X-Reference-Id instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
      * @return string payment reference id
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -173,11 +175,12 @@ class DisbursementApi extends AbstractApiProduct
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function deposit(PaymentRequest $paymentRequest): string
+    public function deposit(PaymentRequest $paymentRequest, ?string $referenceId = null): string
     {
-        $token = $this->getAccessToken();
+        $xReferenceId = $referenceId ?? Uuid::v4();
+        Uuid::assert($xReferenceId, 'referenceId');
 
-        $xReferenceId = Uuid::v4();
+        $token = $this->getAccessToken();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
@@ -267,6 +270,8 @@ class DisbursementApi extends AbstractApiProduct
      * $transferId = $momo->disbursement()->transfer($request);
      * ```
      * @param TransferRequest $transferRequest
+     * @param string|null $referenceId UUID to use as the X-Reference-Id instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
      * @return string transfer reference id
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -275,11 +280,12 @@ class DisbursementApi extends AbstractApiProduct
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function transfer(TransferRequest $transferRequest): string
+    public function transfer(TransferRequest $transferRequest, ?string $referenceId = null): string
     {
-        $token = $this->getAccessToken();
+        $xReferenceId = $referenceId ?? Uuid::v4();
+        Uuid::assert($xReferenceId, 'referenceId');
 
-        $xReferenceId = Uuid::v4();
+        $token = $this->getAccessToken();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
@@ -368,6 +374,8 @@ class DisbursementApi extends AbstractApiProduct
      * $refundId = $momo->disbursement()->refund($request);
      * ```
      * @param RefundRequest $refundRequest
+     * @param string|null $referenceId UUID to use as the X-Reference-Id instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
      * @return string refund reference id
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -376,11 +384,12 @@ class DisbursementApi extends AbstractApiProduct
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function refund(RefundRequest $refundRequest): string
+    public function refund(RefundRequest $refundRequest, ?string $referenceId = null): string
     {
-        $token = $this->getAccessToken();
+        $xReferenceId = $referenceId ?? Uuid::v4();
+        Uuid::assert($xReferenceId, 'referenceId');
 
-        $xReferenceId = Uuid::v4();
+        $token = $this->getAccessToken();
 
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Write methods take an optional caller-supplied id: `$referenceId` on MTN
+  `requestToPay()`, `quickPay()`, `deposit()`, `transfer()` and `refund()`
+  (sent as `X-Reference-Id`), `$transactionId` on Airtel `requestToPay()` and
+  `transfer()` (sent as `transaction.id`). The id is returned and is what the
+  status methods take, so after a timeout or 5xx you can query a payment whose
+  response you never saw, and retry with the same id instead of risking a second
+  payment ([#22](https://github.com/lepresk/momo-api/issues/22)). It must be a
+  UUID; anything else throws an `InvalidArgumentException` before a request is
+  sent. Omitting it keeps the random UUID, so existing code is unaffected
+- `Uuid::assert()` to check a value is a UUID
+
 ## [1.4.0] - 2026-09-29
 
 MTN Get Status failures, sandbox currency and callback guidance. Anyone reading
