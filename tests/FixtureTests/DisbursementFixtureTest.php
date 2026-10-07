@@ -113,6 +113,9 @@ class DisbursementFixtureTest extends TestCase
         $this->assertEquals('100', $transaction->getAmount());
         $this->assertEquals('UGX', $transaction->getCurrency());
         $this->assertTrue($transaction->isSuccessful());
+        // MTN omits these on refunds; parsing must not warn
+        $this->assertNull($transaction->getPayerMessage());
+        $this->assertNull($transaction->getPayeeNote());
     }
 
     public function testParseRefundPending()
