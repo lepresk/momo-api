@@ -259,6 +259,33 @@ Status codes: `TS` successful, `TF` failed, `TIP` and `TI` both pending.
 
 ---
 
+### Retrying Without Paying Twice
+
+Each write returns the id you poll its status with. By default it is a random
+UUID, so if the request times out or fails with a 5xx you never learn it: you
+cannot ask whether the payment went through, and retrying sends a new id that
+MTN or Airtel treats as a new payment.
+
+Pass your own UUID as the last argument instead, and store it before sending.
+After an ambiguous failure, query the status with it; retry with the same id
+only once the status says the first attempt does not exist.
+
+```php
+use Ramsey\Uuid\Uuid;
+
+// Derive it from your own key, so the same line always gets the same id
+$referenceId = Uuid::uuid5(MY_NAMESPACE_UUID, "{$batchRef}-{$lineNo}")->toString();
+$disbursement->transfer($transfer, $referenceId);
+$status = $disbursement->getTransferStatus($referenceId);
+
+// Airtel takes it as $transactionId, the externalId it returns
+$airtelDisbursement->transfer('10000', '068511358', 'PAY-001', $referenceId);
+```
+
+The id must be a UUID (any version): anything else throws an
+`InvalidArgumentException` before a request is sent. Without it, every method
+keeps generating a random UUID.
+
 ### Handling Callbacks
 
 > **Callbacks are not signed.** Neither MTN nor Airtel signs the request sent to
@@ -384,8 +411,8 @@ if ($transaction->isFailed()) {
 
 | Method | Description |
 |--------|-------------|
-| `requestToPay(PaymentRequest $request)` | Request payment from customer |
-| `quickPay(string $amount, string $phone, string $ref)` | Quick payment helper |
+| `requestToPay(PaymentRequest $request, ?string $referenceId = null)` | Request payment from customer |
+| `quickPay(string $amount, string $phone, string $ref, string $currency = 'XAF', ?string $referenceId = null)` | Quick payment helper |
 | `getPaymentStatus(string $paymentId)` | Check payment status |
 | `checkAccountHolder(string $phone)` | Check if MSISDN is active |
 | `getBalance()` | Get account balance |
@@ -395,11 +422,11 @@ if ($transaction->isFailed()) {
 
 | Method | Description |
 |--------|-------------|
-| `transfer(TransferRequest $request)` | Transfer money to beneficiary |
+| `transfer(TransferRequest $request, ?string $referenceId = null)` | Transfer money to beneficiary |
 | `getTransferStatus(string $transferId)` | Check transfer status |
-| `deposit(PaymentRequest $request)` | Deposit funds |
+| `deposit(PaymentRequest $request, ?string $referenceId = null)` | Deposit funds |
 | `getDepositStatus(string $depositId)` | Check deposit status |
-| `refund(RefundRequest $request)` | Refund a transaction |
+| `refund(RefundRequest $request, ?string $referenceId = null)` | Refund a transaction |
 | `getRefundStatus(string $refundId)` | Check refund status |
 | `checkAccountHolder(string $phone)` | Check if MSISDN is active |
 | `getBalance()` | Get account balance |
@@ -409,7 +436,7 @@ if ($transaction->isFailed()) {
 
 | Method | Description |
 |--------|-------------|
-| `requestToPay(string $amount, string $phone, string $reference)` | Request payment from customer |
+| `requestToPay(string $amount, string $phone, string $reference, ?string $transactionId = null)` | Request payment from customer |
 | `getPaymentStatus(string $externalId)` | Check payment status (returns `AirtelTransaction`) |
 | `getBalance()` | Get account balance |
 | `getAccessToken()` | Get OAuth token (cached automatically) |
@@ -418,7 +445,7 @@ if ($transaction->isFailed()) {
 
 | Method | Description |
 |--------|-------------|
-| `transfer(string $amount, string $phone, string $reference)` | Transfer money (requires `encryptedPin`) |
+| `transfer(string $amount, string $phone, string $reference, ?string $transactionId = null)` | Transfer money (requires `encryptedPin`) |
 | `getTransferStatus(string $externalId)` | Check transfer status (returns `AirtelTransaction`) |
 | `getBalance()` | Get account balance |
 | `getAccessToken()` | Get OAuth token (cached automatically) |

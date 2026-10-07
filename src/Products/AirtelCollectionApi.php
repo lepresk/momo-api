@@ -76,16 +76,25 @@ class AirtelCollectionApi
     /**
      * Initiate a payment request. Returns the externalId to use for status checks.
      *
+     * @param string|null $transactionId UUID to use as the externalId instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
+     * @throws \InvalidArgumentException if $transactionId is not a UUID
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function requestToPay(string $amount, string $phone, string $reference): string
-    {
+    public function requestToPay(
+        string $amount,
+        string $phone,
+        string $reference,
+        ?string $transactionId = null
+    ): string {
+        $externalId = $transactionId ?? Uuid::v4();
+        Uuid::assert($externalId, 'transactionId');
+
         $token = $this->getAccessToken();
-        $externalId = Uuid::v4();
 
         $response = $this->client->request('POST', '/merchant/v1/payments/', [
             'json' => [

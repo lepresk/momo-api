@@ -49,6 +49,8 @@ class CollectionApi extends AbstractApiProduct
      * ```
      *
      * @param PaymentRequest $paymentRequest
+     * @param string|null $referenceId UUID to use as the X-Reference-Id instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
      * @return string Format - UUID. Recource ID of the created request to pay transaction. This ID is used, for example, validating the status of the request. ‘Universal Unique ID’ for the transaction generated using UUID version 4.
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -57,9 +59,10 @@ class CollectionApi extends AbstractApiProduct
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function requestToPay(PaymentRequest $paymentRequest): string
+    public function requestToPay(PaymentRequest $paymentRequest, ?string $referenceId = null): string
     {
-        $xReferenceId = Uuid::v4();
+        $xReferenceId = $referenceId ?? Uuid::v4();
+        Uuid::assert($xReferenceId, 'referenceId');
 
         $token = $this->getAccessToken();
 
@@ -268,6 +271,8 @@ class CollectionApi extends AbstractApiProduct
      * @param string $phone
      * @param string $reference
      * @param string $currency
+     * @param string|null $referenceId UUID to use as the X-Reference-Id instead of a random one, so the
+     *        operation can be queried, and not resent, even if the response never arrives
      * @return string payment ID
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -280,7 +285,8 @@ class CollectionApi extends AbstractApiProduct
         string $amount,
         string $phone,
         string $reference,
-        string $currency = 'XAF'
+        string $currency = 'XAF',
+        ?string $referenceId = null
     ): string {
         $request = new PaymentRequest(
             $amount,
@@ -291,6 +297,6 @@ class CollectionApi extends AbstractApiProduct
             ''
         );
 
-        return $this->requestToPay($request);
+        return $this->requestToPay($request, $referenceId);
     }
 }
