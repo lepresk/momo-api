@@ -10,6 +10,7 @@ class AirtelPin
 {
     private const PEM_HEADER = '-----BEGIN PUBLIC KEY-----';
     private const PEM_FOOTER = '-----END PUBLIC KEY-----';
+    private const BASE64_TEXT = '/^[A-Za-z0-9+\/=\s]+$/';
 
     /**
      * Encrypt a disbursement PIN with Airtel's RSA public key.
@@ -28,7 +29,7 @@ class AirtelPin
      * ```
      *
      * @param string $pin the plain PIN
-     * @param string $publicKey Airtel's public key, base64-encoded or PEM
+     * @param string $publicKey Airtel's public key: PEM, base64-encoded PEM, or the bare base64 body
      * @return string the encrypted PIN, base64-encoded
      * @throws InvalidArgumentException when no key is given
      * @throws RuntimeException when the key is unusable or encryption fails
@@ -57,8 +58,8 @@ class AirtelPin
     }
 
     /**
-     * Airtel hands out the public key base64-encoded, sometimes with the PEM
-     * armour and sometimes without. Accept either, plus a plain PEM.
+     * Airtel hands out the public key in several shapes: a PEM, a base64-encoded
+     * PEM, the bare base64 body, or that body base64-encoded again. Accept all four.
      */
     private static function toPem(string $key): string
     {
@@ -72,7 +73,10 @@ class AirtelPin
             return $decoded;
         }
 
-        $body = chunk_split(preg_replace('/\s/', '', $decoded) ?? $decoded, 64, "\n");
+        // Either the base64 DER body itself, which decodes to binary, or that body
+        // base64-encoded once more, which decodes to base64 text
+        $source = preg_match(self::BASE64_TEXT, $decoded) === 1 ? $decoded : $trimmed;
+        $body = chunk_split(preg_replace('/\s/', '', $source) ?? $source, 64, "\n");
 
         return self::PEM_HEADER . "\n" . $body . self::PEM_FOOTER;
     }

@@ -234,7 +234,7 @@ $disbursement = AirtelApi::disbursement('production', AirtelConfig::disbursement
 ));
 ```
 
-The key is accepted base64-encoded or as PEM.
+The key is accepted as PEM, base64-encoded PEM, or the bare base64 body (`MIIBIj...`).
 
 ### Airtel Phone Numbers
 

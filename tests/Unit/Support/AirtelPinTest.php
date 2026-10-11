@@ -81,6 +81,17 @@ class AirtelPinTest extends TestCase
         $this->assertSame('4321', $this->decrypt(AirtelPin::encrypt('4321', base64_encode($bare))));
     }
 
+    public function testAcceptsTheBareBase64Body(): void
+    {
+        $bare = str_replace(
+            ['-----BEGIN PUBLIC KEY-----', '-----END PUBLIC KEY-----', "\n", "\r"],
+            '',
+            $this->publicKeyPem
+        );
+
+        $this->assertSame('5678', $this->decrypt(AirtelPin::encrypt('5678', $bare)));
+    }
+
     public function testRejectsAnEmptyKey(): void
     {
         $this->expectException(InvalidArgumentException::class);

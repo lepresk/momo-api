@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-11
+
+### Fixed
+- `AirtelPin::encrypt()` now accepts the public key as the bare base64 body
+  (`MIIBIj...`, a PEM without its header and footer), which is likely how the
+  Airtel portal shows it. That shape used to fail with `PIN encryption failed`;
+  a PEM, a base64-encoded PEM and a base64-encoded body still work
+
 ## [1.5.0] - 2026-10-07
 
 Caller-supplied reference ids, and transfer and refund statuses that no longer
