@@ -31,7 +31,7 @@ class MomoApi
 
 
     public const SANDBOX_URL = 'https://sandbox.momodeveloper.mtn.com';
-    public const PRODUCTION_URL = 'https://proxy.momoapi.mtn.com';
+    public const PRODUCTION_URL = 'https://momoapi.momo.africa';
 
     public string $environment;
 
