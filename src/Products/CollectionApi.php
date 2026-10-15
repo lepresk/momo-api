@@ -124,6 +124,7 @@ class CollectionApi extends AbstractApiProduct
             'auth_basic' => [$this->config->getApiUser(), $this->config->getApiKey()],
             'headers' => [
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                'X-Target-Environment' => $this->environment,
             ],
         ]);
 
