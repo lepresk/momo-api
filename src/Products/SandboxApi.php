@@ -45,6 +45,8 @@ class SandboxApi extends AbstractApiProduct
                 'X-Reference-Id' => $apiUser,
                 'Content-Type' => 'application/json',
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                // Provisioning only exists in the sandbox
+                'X-Target-Environment' => 'sandbox',
             ]
         ]);
 
@@ -80,6 +82,8 @@ class SandboxApi extends AbstractApiProduct
         $response = $this->client->request('GET', "/v1_0/apiuser/$apiUser", [
             'headers' => [
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                // Provisioning only exists in the sandbox
+                'X-Target-Environment' => 'sandbox',
             ]
         ]);
 
@@ -115,6 +119,8 @@ class SandboxApi extends AbstractApiProduct
         $response = $this->client->request('POST', "/v1_0/apiuser/$apiUser/apikey", [
             'headers' => [
                 'Ocp-Apim-Subscription-Key' => $this->getSubscriptionKey(),
+                // Provisioning only exists in the sandbox
+                'X-Target-Environment' => 'sandbox',
             ]
         ]);
 
